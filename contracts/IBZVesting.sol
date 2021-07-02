@@ -2,24 +2,25 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "../lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
+// import "../lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
+import "../lib/@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "../lib/@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 import "../lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "../lib/@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "../lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "./IBZVestingStorage.sol";
 
-contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC20PausableUpgradeable {
+contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, PausableUpgradeable {
+    using SafeMathUpgradeable for uint;
 
     function initialize(address _tokenToVest) initializer public {
         __Ownable_init();
-        // __ERC20_init('Ibiza token', 'IBZ');
-        // __ERC20Pausable_init();
+        __Pausable_init();
 
-	    // // Mint All TotalSuply in the Account OwnerShip
-        // _mint(owner(), getMaxTotalSupply());
         tokenToBeVested = _tokenToVest;
 
-        vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 1, true)); // 0 Days 100%
+        // all percentages are multiplied by 1e18
+        vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 1, true)); // 0 Days 100% (100 * 1e18)
         vestingTypes.push(VestingType(8000000000000000000, 12000000000000000000, 30 days, 0, true)); // 12% TGE + 8% every 30 days
         vestingTypes.push(VestingType(6000000000000000000, 10000000000000000000, 30 days, 0, true)); // 10% TGE + 6% every 30 days
         vestingTypes.push(VestingType(5000000000000000000, 10000000000000000000, 30 days, 0, true)); // 10% TGE + 6% every 30 days
@@ -32,16 +33,21 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC
         releaseTime = _relTime; 
     }
 
-    function getReleaseTime() public pure returns (uint) {
-        return 1624266486; // "Mon Jun 21 2021 09:08:06 GMT"
+    function getReleaseTime() public view returns (uint) {
+        return releaseTime; // "Fri Jul 02 2021 13:09:08 GMT"
     }
-
-    // function getMaxTotalSupply() public pure returns (uint) {
-    //     return uint(400000000).mul(1e18);
-    // }
 
     function mulDiv(uint x, uint y, uint z) public pure returns (uint) {
         return x.mul(y).div(z);
+    }
+
+    function depositPerVestingType(address[] memory addresses, uint[] memory totalAmounts, uint vestingTypeIndex) public onlyOwner {
+        uint totalAmount;
+        for (uint i = 0; i < totalAmounts.length; i++) {
+            totalAmount = totalAmount + totalAmounts[i];
+        }
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(tokenToBeVested), msg.sender, address(this), totalAmount);
+        addAllocations(addresses, totalAmounts, vestingTypeIndex);
     }
 
     function addAllocations(address[] memory addresses, uint[] memory totalAmounts, uint vestingTypeIndex) public payable onlyOwner returns (bool) {
@@ -63,29 +69,13 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC
 
         return true;
     }
-/*
-    function _mint(address account, uint amount) internal override {
-        uint totalSupply = super.totalSupply();
-        require(getMaxTotalSupply() >= totalSupply.add(amount), "Max total supply over");
-
-        super._mint(account, amount);
-    }
-*/
-    function depositPerVestingType(address[] memory addresses, uint[] memory totalAmounts, uint vestingTypeIndex) public onlyOwner {
-        uint totalAmount;
-        for (uint i = 0; i < totalAmounts.length; i++) {
-            totalAmount = totalAmount + totalAmounts[i];
-        }
-        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(tokenToBeVested), msg.sender, address(this), totalAmount);
-        addAllocations(addresses, totalAmounts, vestingTypeIndex);
-    }
 
     function addFrozenWallet(address wallet, uint totalAmount, uint monthlyAmount, uint initialAmount, uint afterDays, uint monthsDelay) internal {
         uint releaseTime = getReleaseTime();
 
-        if (!frozenWallets[wallet].scheduled) {
-            super._transfer(msg.sender, wallet, totalAmount);
-        }
+        // if (!frozenWallets[wallet].scheduled) {
+            SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(tokenToBeVested), wallet, totalAmount);
+        // }
 
         // Create frozen wallets
         FrozenWallet memory frozenWallet = FrozenWallet(
@@ -95,7 +85,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC
             initialAmount,
             releaseTime.add(afterDays),
             afterDays,
-            true,
+            // true,
             monthsDelay
         );
 
@@ -146,7 +136,26 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC
         return transferableAmount;
     }
 
+    function transferFromFrozenWallet(address frozenWallet, address[] calldata recipients, uint[] calldata amounts) external onlyOwner {
+         require(recipients.length == amounts.length, "PAID Token: Wrong array length");
 
+        uint total = 0;
+        for (uint i = 0; i < amounts.length; i++) {
+            total = total.add(amounts[i]);
+        }
+        
+        require (canTransfer(frozenWallet, total), "PAID Token: can not transfer yet");
+
+        for (uint i = 0; i < recipients.length; i++) {
+            address recipient = recipients[i];
+            uint amount = amounts[i];
+            require(recipient != address(0), "ERC20: transfer to the zero address");
+            
+            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(tokenToBeVested), frozenWallet, recipient, amount);
+            // emit Transfer(address(this), recipient, amount);
+        }
+    }
+/*
     function transferMany(address[] calldata recipients, uint[] calldata amounts) external onlyOwner {
         require(recipients.length == amounts.length, "PAID Token: Wrong array length");
 
@@ -155,18 +164,16 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC
             total = total.add(amounts[i]);
         }
 
-	    _balances[msg.sender] = _balances[msg.sender].sub(total, "ERC20: transfer amount exceeds balance");
-
         for (uint i = 0; i < recipients.length; i++) {
             address recipient = recipients[i];
             uint amount = amounts[i];
             require(recipient != address(0), "ERC20: transfer to the zero address");
-
-            _balances[recipient] = _balances[recipient].add(amount);
-            emit Transfer(msg.sender, recipient, amount);
+            
+            SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(tokenToBeVested), recipient, amount);
+            // emit Transfer(address(this), recipient, amount);
         }
     }
-
+*/
 
     function getRestAmount(address sender) public view returns (uint) {
         uint transferableAmount = getTransferableAmount(sender);
@@ -178,14 +185,14 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC
     // Transfer control
     function canTransfer(address sender, uint amount) public view returns (bool) {
         // Control is scheduled wallet
-        if (!frozenWallets[sender].scheduled) {
-            return true;
-        }
+        // if (!frozenWallets[sender].scheduled) {
+        //     return true;
+        // }
 
-        uint balance = balanceOf(sender);
+        uint balance = IERC20Upgradeable(tokenToBeVested).balanceOf(sender);
         uint restAmount = getRestAmount(sender);
 
-        if (balance > frozenWallets[sender].totalAmount && balance.sub(frozenWallets[sender].totalAmount) >= amount) {
+        if (balance >= frozenWallets[sender].totalAmount && balance.sub(frozenWallets[sender].totalAmount) >= amount) {
             return true;
         }
 
@@ -197,17 +204,13 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC
     }
 
     // @override
-    function _beforeTokenTransfer(address sender, address recipient, uint amount) internal virtual override {
-        require(canTransfer(sender, amount), "Wait for vesting day!");
-        super._beforeTokenTransfer(sender, recipient, amount);
-    }
+    // function _beforeTokenTransfer(address sender, address recipient, uint amount) internal virtual override {
+    //     require(canTransfer(sender, amount), "Wait for vesting day!");
+    //     super._beforeTokenTransfer(sender, recipient, amount);
+    // }
 
-    function withdraw(uint amount) public onlyOwner {
-        require(address(this).balance >= amount, "Address: insufficient balance");
-
-        // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
-        (bool success, ) = _msgSender().call{ value: amount }("");
-        require(success, "Address: unable to send value, recipient may have reverted");
+    function emergencyWithdraw(address _token, uint amount) public onlyOwner {
+        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(_token), msg.sender, amount);
     }
 
     function pause(bool status) public onlyOwner {

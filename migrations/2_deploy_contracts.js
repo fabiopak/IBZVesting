@@ -1,8 +1,7 @@
 const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 require('dotenv').config();
-// handle migrations
-// const PaidToken = artifacts.require("PaidToken");
-// const PaidTokenV2 = artifacts.require("PaidTokenV2");
+
+const IbizaToken = artifacts.require("IbizaToken");
 const IbizaVesting = artifacts.require("IBZVesting");
 
 //Allocation Accounts
@@ -32,9 +31,14 @@ const amount7 = process.env.AMOUNT_7
 module.exports = async function (deployer,  network, accounts) {
 
   if (network == "development") {
+    const tokenInstance = await deployProxy(IbizaToken, [1000000000], { from: accounts[0] });
+    console.log("Ibiza Token Address: " + tokenInstance.address);
+
     // Testnet Approach Stage #1
-    const instance = await deployProxy(IbizaVesting, [], { from: accounts[0] });
-    console.log("Ibiza Token Address: " + instance.address);
+    const vestingInstance = await deployProxy(IbizaVesting, [tokenInstance.address], { from: accounts[0] });
+    console.log("Ibiza Token Vesting Address: " + vestingInstance.address);
+
+    await vestingInstance.setReleaseTime(1625235658, { from: accounts[0] });
 
     // console.log(accounts)
 
@@ -52,23 +56,24 @@ module.exports = async function (deployer,  network, accounts) {
       allocation8
     ]
   */
-    const amounts = [
-      amount1,
-      amount2,
-      amount3,
-      amount4,
-      amount5,
-      amount6,
-      amount7/*,
-      amount8*/
-    ]
+    // const amounts = [
+    //   amount1,
+    //   amount2,
+    //   amount3,
+    //   amount4,
+    //   amount5,
+    //   amount6,
+    //   amount7/*,
+    //   amount8*/
+    // ]
 
-    //for (const i in wallets) {
-    for(i = 0; i < 7; i++) {
-      //console.log(accounts[i]);
-      await instance.addAllocations([accounts[i+3]], [amounts[i]], (i).toString());
-      //console.log(i)
-    }
+    // await tokenInstance.approve(vestingInstance.address, 10 * (1e18))
+    // //for (const i in wallets) {
+    // for(i = 0; i < 7; i++) {
+    //   //console.log(accounts[i]);
+    //   await vestingInstance.depositPerVestingType([accounts[i+3]], [amounts[i]], (i).toString());
+    //   //console.log(i)
+    // }
 
     // const mt2 = await upgradeProxy(instance.address, IbizaVesting, [], {from: accounts[0]});
     // console.log('Ibiza Token Updated address: ' + mt2.address)
