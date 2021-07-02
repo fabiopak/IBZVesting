@@ -85,7 +85,6 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
             initialAmount,
             releaseTime.add(afterDays),
             afterDays,
-            // true,
             monthsDelay
         );
 

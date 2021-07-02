@@ -9,7 +9,6 @@ contract IBZVestingStorage {
         uint initialAmount;
         uint startDay;
         uint afterDays;
-        // bool scheduled;
         uint monthsDelay;
     }
 
