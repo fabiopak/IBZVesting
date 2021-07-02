@@ -21,6 +21,9 @@ contract IBZVestingStorage {
         bool vesting;
     }
 
+    uint public releaseTime;
+    address public tokenToBeVested;
+
     mapping (address => FrozenWallet) public frozenWallets;
     VestingType[] public vestingTypes;
 }

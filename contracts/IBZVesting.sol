@@ -3,19 +3,21 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import "../lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20PausableUpgradeable.sol";
+import "../lib/@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 import "../lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "./IBZVestingStorage.sol";
 
 contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC20PausableUpgradeable {
 
-    function initialize() initializer public {
+    function initialize(address _tokenToVest) initializer public {
         __Ownable_init();
-        __ERC20_init('Ibiza token', 'IBZ');
-        __ERC20Pausable_init();
+        // __ERC20_init('Ibiza token', 'IBZ');
+        // __ERC20Pausable_init();
 
-	    // Mint All TotalSuply in the Account OwnerShip
-        _mint(owner(), getMaxTotalSupply());
+	    // // Mint All TotalSuply in the Account OwnerShip
+        // _mint(owner(), getMaxTotalSupply());
+        tokenToBeVested = _tokenToVest;
 
         vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 1, true)); // 0 Days 100%
         vestingTypes.push(VestingType(8000000000000000000, 12000000000000000000, 30 days, 0, true)); // 12% TGE + 8% every 30 days
@@ -26,19 +28,23 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC
         vestingTypes.push(VestingType(4000000000000000000, 0, 30 days, 14, true)); // 14 months delay + 4% every 30 days
     }
 
+    function setReleaseTime(uint _relTime) public onlyOwner {
+        releaseTime = _relTime; 
+    }
+
     function getReleaseTime() public pure returns (uint) {
         return 1624266486; // "Mon Jun 21 2021 09:08:06 GMT"
     }
 
-    function getMaxTotalSupply() public pure returns (uint) {
-        return uint(400000000).mul(1e18);
-    }
+    // function getMaxTotalSupply() public pure returns (uint) {
+    //     return uint(400000000).mul(1e18);
+    // }
 
     function mulDiv(uint x, uint y, uint z) public pure returns (uint) {
         return x.mul(y).div(z);
     }
 
-    function addAllocations(address[] memory addresses, uint[] memory totalAmounts, uint vestingTypeIndex) external payable onlyOwner returns (bool) {
+    function addAllocations(address[] memory addresses, uint[] memory totalAmounts, uint vestingTypeIndex) public payable onlyOwner returns (bool) {
         require(addresses.length == totalAmounts.length, "Address and totalAmounts length must be same");
         require(vestingTypes[vestingTypeIndex].vesting, "Vesting type isn't found");
 
@@ -57,12 +63,21 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, ERC
 
         return true;
     }
-
+/*
     function _mint(address account, uint amount) internal override {
         uint totalSupply = super.totalSupply();
         require(getMaxTotalSupply() >= totalSupply.add(amount), "Max total supply over");
 
         super._mint(account, amount);
+    }
+*/
+    function depositPerVestingType(address[] memory addresses, uint[] memory totalAmounts, uint vestingTypeIndex) public onlyOwner {
+        uint totalAmount;
+        for (uint i = 0; i < totalAmounts.length; i++) {
+            totalAmount = totalAmount + totalAmounts[i];
+        }
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(tokenToBeVested), msg.sender, address(this), totalAmount);
+        addAllocations(addresses, totalAmounts, vestingTypeIndex);
     }
 
     function addFrozenWallet(address wallet, uint totalAmount, uint monthlyAmount, uint initialAmount, uint afterDays, uint monthsDelay) internal {
