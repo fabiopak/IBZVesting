@@ -1,0 +1,39 @@
+{
+  "name": "ibzvesting",
+  "version": "1.0.0",
+  "description": "Vesting per token IBZ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabiopak/IBZVesting.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fabiopak/IBZVesting/issues"
+  },
+  "homepage": "https://github.com/fabiopak/IBZVesting#readme",
+  "dependencies": {
+    "@openzeppelin/cli": "^2.8.2",
+    "@openzeppelin/contracts": "3.3.0",
+    "@openzeppelin/contracts-upgradeable": "3.3.0",
+    "@openzeppelin/upgrades": "2.8.0",
+    "@openzeppelin/upgrades-core": "1.5.1",
+    "@truffle/hdwallet-provider": "^1.2.1",
+    "dotenv": "^8.2.0",
+    "ethereum-checksum-address": "0.0.6",
+    "truffle-contract-size": "^2.0.1"
+  },
+  "devDependencies": {
+    "@openzeppelin/fuzzy-solidity-import-parser": "0.1.2",
+    "@openzeppelin/truffle-upgrades": "1.5.0",
+    "eth-gas-reporter": "^0.2.22",
+    "ganache-cli": "^6.12.2",
+    "solidity-coverage": "^0.7.16",
+    "truffle": "^5.2.3",
+    "truffle-plugin-verify": "^0.5.8"
+  }
+}
