@@ -254,7 +254,7 @@ contract("IbizaVesting Test", accounts => {
     });
 
     it("transfer logs", async () => {
-        const instance = await IbizaVesting.deployed();
+        // const instance = await IbizaVesting.deployed();
         await advanceBlockAtTime(releaseTime + (2 * 30) * oneDay);
 
         const types = {
@@ -275,10 +275,10 @@ contract("IbizaVesting Test", accounts => {
 
                 await advanceBlockAtTime(releaseTime + (i * 30) * oneDay);
 
-                let timestamp = await instance.getTimestamp.call()
-                let transferable = await instance.getTransferableAmount.call(x)
-                let rest = await instance.getRestAmount.call(x)
-                let canTransfer = await instance.canTransfer.call(x, transferable)
+                let timestamp = await ibzVestingContract.getTimestamp.call()
+                let transferable = await ibzVestingContract.getTransferableAmount.call(x)
+                let rest = await ibzVestingContract.getRestAmount.call(x)
+                let canTransfer = await ibzVestingContract.canTransfer.call(x, transferable)
 
                 if (lastTransferableAmount !== transferable.toString()) {
                     console.log(`${types[x]} ${x}. box`, new Date(day), new Date(timestamp.toNumber() * 1000), (i + 1) + '. month - ', (i * 30) + '. day - ', 
