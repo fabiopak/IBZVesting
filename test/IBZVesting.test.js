@@ -114,36 +114,43 @@ contract("IbizaVesting Test", accounts => {
         frozen = await ibzVestingContract.frozenWallets(0)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(0)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 1, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenWallets(1)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(1)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 2, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenWallets(2)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(2)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 3, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenWallets(3)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(3)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 4, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenWallets(4)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(4)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 5, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenWallets(5)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(5)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 6, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenWallets(6)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(6)).toString())
     });
 /*
     it("shouldn't send token", async function () {
