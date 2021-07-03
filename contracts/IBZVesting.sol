@@ -190,16 +190,16 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         //     return true;
         // }
 
-        // uint balance = frozenWallets[idxVest].totalAmount;
-        // uint restAmount = getRestAmount(idxVest);
+        uint balance = frozenWallets[idxVest].totalAmount;
+        uint restAmount = getRestAmount(idxVest);
         uint transfAmount = getTransferableAmount(idxVest);
 
-        if (amount <= transfAmount /*&& balance.sub(frozenWallets[idxVest].totalAmount) >= amount*/) {
-            return true;
+        if (!isStarted(frozenWallets[idxVest].startDay) || balance.sub(amount) < restAmount) {
+            return false;
         }
 
-        if (!isStarted(frozenWallets[idxVest].startDay) /*|| balance.sub(amount) < restAmount*/) {
-            return false;
+        else if (amount <= transfAmount) {
+            return true;
         }
 
         return false;
