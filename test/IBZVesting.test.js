@@ -21,8 +21,8 @@ const IbizaToken = artifacts.require("IbizaToken");
 const IbizaVesting = artifacts.require("IBZVesting");
 
 //const releaseTime = 1611588600000;
-const releaseTime = 1625330706000;  // future date
 const oneDay = 86400000;
+const releaseTime = (Date.now() / 1000).toFixed(0) * 1000 + oneDay;  // release date is set to one day after the starting of the test
 //const _oneDay = 86400000;
 
 //Allocation Amount
