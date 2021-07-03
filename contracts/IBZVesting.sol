@@ -34,52 +34,54 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
     }
 
     function getReleaseTime() public view returns (uint) {
-        return releaseTime; // "Fri Jul 02 2021 13:09:08 GMT"
+        return releaseTime;
     }
 
     function mulDiv(uint x, uint y, uint z) public pure returns (uint) {
         return x.mul(y).div(z);
     }
 
-    function depositPerVestingType(address[] memory addresses, uint[] memory totalAmounts, uint vestingTypeIndex) public onlyOwner {
+    function depositPerVestingType(/*address[] memory addresses, */uint[] memory totalAmounts, uint vestingTypeIndex) public onlyOwner {
         uint totalAmount;
         for (uint i = 0; i < totalAmounts.length; i++) {
             totalAmount = totalAmount + totalAmounts[i];
         }
         SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(tokenToBeVested), msg.sender, address(this), totalAmount);
-        addAllocations(addresses, totalAmounts, vestingTypeIndex);
+        addAllocations(/*addresses,*/ totalAmounts, vestingTypeIndex);
     }
 
-    function addAllocations(address[] memory addresses, uint[] memory totalAmounts, uint vestingTypeIndex) public payable onlyOwner returns (bool) {
-        require(addresses.length == totalAmounts.length, "Address and totalAmounts length must be same");
+    function addAllocations(/*address[] memory addresses,*/ uint[] memory totalAmounts, uint vestingTypeIndex) public payable onlyOwner returns (bool) {
+        // require(addresses.length == totalAmounts.length, "Address and totalAmounts length must be same");
         require(vestingTypes[vestingTypeIndex].vesting, "Vesting type isn't found");
 
         VestingType memory vestingType = vestingTypes[vestingTypeIndex];
 
-        for(uint i = 0; i < addresses.length; i++) {
-            address _address = addresses[i];
+        for(uint i = 0; i < totalAmounts.length; i++) {
+            // address _address = addresses[i];
             uint totalAmount = totalAmounts[i];
             uint monthlyAmount = mulDiv(totalAmounts[i], vestingType.monthlyRate, 100000000000000000000);  // amount * MonthlyRate / 100
             uint initialAmount = mulDiv(totalAmounts[i], vestingType.initialRate, 100000000000000000000);  // amount * MonthlyRate / 100
             uint afterDay = vestingType.afterDays;
             uint monthsDelay = vestingType.monthsDelay;
 
-            addFrozenWallet(_address, totalAmount, monthlyAmount, initialAmount, afterDay, monthsDelay);
+            addFrozenWallet(/*_address,*/ totalAmount, monthlyAmount, initialAmount, afterDay, monthsDelay);
+
+            vestingCounter = vestingCounter.add(1);
         }
 
         return true;
     }
 
-    function addFrozenWallet(address wallet, uint totalAmount, uint monthlyAmount, uint initialAmount, uint afterDays, uint monthsDelay) internal {
+    function addFrozenWallet(/*address wallet,*/ uint totalAmount, uint monthlyAmount, uint initialAmount, uint afterDays, uint monthsDelay) internal {
         uint releaseTime = getReleaseTime();
 
         // if (!frozenWallets[wallet].scheduled) {
-            SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(tokenToBeVested), wallet, totalAmount);
+            //SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(tokenToBeVested), wallet, totalAmount);
         // }
 
         // Create frozen wallets
         FrozenWallet memory frozenWallet = FrozenWallet(
-            wallet,
+            vestingCounter,
             totalAmount,
             monthlyAmount,
             initialAmount,
@@ -89,7 +91,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         );
 
         // Add wallet to frozen wallets
-        frozenWallets[wallet] = frozenWallet;
+        frozenWallets[vestingCounter] = frozenWallet;
     }
 
     function getTimestamp() external view returns (uint) {
@@ -123,40 +125,40 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         return true;
     }
 
-    function getTransferableAmount(address sender) public view returns (uint) {
-        uint months = getMonths(frozenWallets[sender].afterDays, frozenWallets[sender].monthsDelay);
-        uint monthlyTransferableAmount = frozenWallets[sender].monthlyAmount.mul(months);
-        uint transferableAmount = monthlyTransferableAmount.add(frozenWallets[sender].initialAmount);
+    function getTransferableAmount(uint idxVest) public view returns (uint) {
+        uint months = getMonths(frozenWallets[idxVest].afterDays, frozenWallets[idxVest].monthsDelay);
+        uint monthlyTransferableAmount = frozenWallets[idxVest].monthlyAmount.mul(months);
+        uint transferableAmount = monthlyTransferableAmount.add(frozenWallets[idxVest].initialAmount);
 
-        if (transferableAmount > frozenWallets[sender].totalAmount) {
-            return frozenWallets[sender].totalAmount;
+        if (transferableAmount > frozenWallets[idxVest].totalAmount) {
+            return frozenWallets[idxVest].totalAmount;
         }
 
         return transferableAmount;
     }
 
-    function transferFromFrozenWallet(address frozenWallet, address[] calldata recipients, uint[] calldata amounts) external onlyOwner {
-         require(recipients.length == amounts.length, "PAID Token: Wrong array length");
+    function transferFromFrozenWallet(uint idxVest, address[] calldata recipients, uint[] calldata amounts) external onlyOwner {
+         require(recipients.length == amounts.length, "IBZVesting: Wrong array length");
 
         uint total = 0;
         for (uint i = 0; i < amounts.length; i++) {
             total = total.add(amounts[i]);
         }
         
-        require (canTransfer(frozenWallet, total), "PAID Token: can not transfer yet");
+        require (canTransfer(idxVest, total), "IBZVesting: can not transfer yet");
 
         for (uint i = 0; i < recipients.length; i++) {
             address recipient = recipients[i];
             uint amount = amounts[i];
-            require(recipient != address(0), "ERC20: transfer to the zero address");
-            
-            SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(tokenToBeVested), frozenWallet, recipient, amount);
+            require(recipient != address(0), "recipients cannot be zero address");
+            frozenWallets[idxVest].totalAmount = frozenWallets[idxVest].totalAmount.sub(amount);
+            SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(tokenToBeVested), recipient, amount);
             // emit Transfer(address(this), recipient, amount);
         }
     }
 /*
     function transferMany(address[] calldata recipients, uint[] calldata amounts) external onlyOwner {
-        require(recipients.length == amounts.length, "PAID Token: Wrong array length");
+        require(recipients.length == amounts.length, "IBZVesting: Wrong array length");
 
         uint total = 0;
         for (uint i = 0; i < amounts.length; i++) {
@@ -174,32 +176,33 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
     }
 */
 
-    function getRestAmount(address sender) public view returns (uint) {
-        uint transferableAmount = getTransferableAmount(sender);
-        uint restAmount = frozenWallets[sender].totalAmount.sub(transferableAmount);
+    function getRestAmount(uint idxVest) public view returns (uint) {
+        uint transferableAmount = getTransferableAmount(idxVest);
+        uint restAmount = frozenWallets[idxVest].totalAmount.sub(transferableAmount);
 
         return restAmount;
     }
 
     // Transfer control
-    function canTransfer(address sender, uint amount) public view returns (bool) {
+    function canTransfer(uint idxVest, uint amount) public view returns (bool) {
         // Control is scheduled wallet
         // if (!frozenWallets[sender].scheduled) {
         //     return true;
         // }
 
-        uint balance = IERC20Upgradeable(tokenToBeVested).balanceOf(sender);
-        uint restAmount = getRestAmount(sender);
+        // uint balance = frozenWallets[idxVest].totalAmount;
+        // uint restAmount = getRestAmount(idxVest);
+        uint transfAmount = getTransferableAmount(idxVest);
 
-        if (balance >= frozenWallets[sender].totalAmount && balance.sub(frozenWallets[sender].totalAmount) >= amount) {
+        if (amount <= transfAmount /*&& balance.sub(frozenWallets[idxVest].totalAmount) >= amount*/) {
             return true;
         }
 
-        if (!isStarted(frozenWallets[sender].startDay) || balance.sub(amount) < restAmount) {
+        if (!isStarted(frozenWallets[idxVest].startDay) /*|| balance.sub(amount) < restAmount*/) {
             return false;
         }
 
-        return true;
+        return false;
     }
 
     // @override

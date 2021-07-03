@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 
 contract IBZVestingStorage {
     struct FrozenWallet {
-        address wallet;
+        uint frozenId;
         uint totalAmount;
         uint monthlyAmount;
         uint initialAmount;
@@ -21,8 +21,9 @@ contract IBZVestingStorage {
     }
 
     uint public releaseTime;
+    uint public vestingCounter;
     address public tokenToBeVested;
 
-    mapping (address => FrozenWallet) public frozenWallets;
+    mapping (uint256 => FrozenWallet) public frozenWallets;
     VestingType[] public vestingTypes;
 }

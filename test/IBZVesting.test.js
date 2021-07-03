@@ -21,7 +21,7 @@ const IbizaToken = artifacts.require("IbizaToken");
 const IbizaVesting = artifacts.require("IBZVesting");
 
 //const releaseTime = 1611588600000;
-const releaseTime = 1626351658000;  // future date
+const releaseTime = 1625330706000;  // future date
 const oneDay = 86400000;
 //const _oneDay = 86400000;
 
@@ -96,31 +96,6 @@ contract("IbizaVesting Test", accounts => {
             })
     });
 
-    // it("shouldn't set wallets", () => {
-    //     const wallets = [accounts[0]];
-    //     const totalAmounts = ['10000000000000000000000000000'];
-
-    //     return IbizaVesting.deployed()
-    //         .then(async instance => {
-
-    //             try {
-    //                 await instance.addAllocations(wallets, totalAmounts, '0', {from: accounts[0]})
-    //             } catch (err) {
-    //                 assert.equal(err.reason, 'Max total supply over');
-    //             }
-    //         })
-    // });
-    // it("should set wallets", async () => {
-    //     const instance = await IbizaVesting.deployed();
-
-    //     for (const i in wallets) {
-    //         const wallet = wallets[i]
-    //         const amount = totalAmounts[i]
-
-    //         const a = await instance.addAllocations([wallet], [amount], i.toString(), {from: '0x67F5B9e57EaE4f5f32E98BB7D7D1fb8F90AcFb45'});
-    //     }
-    // });
-
     // console.log (accounts)
     it("setup", async function () {
         ibzVestingContract = await IbizaVesting.deployed();
@@ -134,67 +109,63 @@ contract("IbizaVesting Test", accounts => {
 
     it("send some tokens to vesting contract", async function () {
         await ibzTokenContract.approve(ibzVestingContract.address, web3.utils.toWei('100000000'), {from: tokenOwner});
-        await ibzVestingContract.depositPerVestingType([allocation1], [web3.utils.toWei('1000000')], 0, {from: tokenOwner});
-        bal = await ibzTokenContract.balanceOf(allocation1)
-        expect(web3.utils.fromWei(bal.toString())).to.be.equal('1000000')
-        await ibzVestingContract.depositPerVestingType([allocation2], [web3.utils.toWei('1000000')], 1, {from: tokenOwner});
-        bal = await ibzTokenContract.balanceOf(allocation2)
-        expect(web3.utils.fromWei(bal.toString())).to.be.equal('1000000')
-        await ibzVestingContract.depositPerVestingType([allocation3], [web3.utils.toWei('1000000')], 2, {from: tokenOwner});
-        bal = await ibzTokenContract.balanceOf(allocation3)
-        expect(web3.utils.fromWei(bal.toString())).to.be.equal('1000000')
-        await ibzVestingContract.depositPerVestingType([allocation4], [web3.utils.toWei('1000000')], 3, {from: tokenOwner});
-        bal = await ibzTokenContract.balanceOf(allocation4)
-        expect(web3.utils.fromWei(bal.toString())).to.be.equal('1000000')
-        await ibzVestingContract.depositPerVestingType([allocation5], [web3.utils.toWei('1000000')], 4, {from: tokenOwner});
-        bal = await ibzTokenContract.balanceOf(allocation5)
-        expect(web3.utils.fromWei(bal.toString())).to.be.equal('1000000')
-        await ibzVestingContract.depositPerVestingType([allocation6], [web3.utils.toWei('1000000')], 5, {from: tokenOwner});
-        bal = await ibzTokenContract.balanceOf(allocation6)
-        expect(web3.utils.fromWei(bal.toString())).to.be.equal('1000000')
-        await ibzVestingContract.depositPerVestingType([allocation7], [web3.utils.toWei('1000000')], 6, {from: tokenOwner});
-        bal = await ibzTokenContract.balanceOf(allocation7)
-        expect(web3.utils.fromWei(bal.toString())).to.be.equal('1000000')
+
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 0, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenWallets(0)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 1, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenWallets(1)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 2, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenWallets(2)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 3, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenWallets(3)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 4, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenWallets(4)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 5, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenWallets(5)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 6, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenWallets(6)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
     });
 /*
-    it("should put 1000000 token account 1", () => {
-        return IbizaVesting.deployed()
-            .then(async instance => instance.balanceOf.call(allocation1))
-            .then((balance) => {
-                assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
-            });
-    });
-
-    it("should put 1000000 token account 2", () => {
-        return IbizaVesting.deployed()
-            .then(instance => instance.balanceOf.call(allocation2))
-            .then((balance) => {
-                assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
-            });
-    });
-*/
     it("shouldn't send token", async function () {
         // console.log((await web3.eth.getBlock()).timestamp)
 
-        await ibzTokenContract.approve(accounts[0], web3.utils.toWei('1000000'), {from: allocation1})
-
-        try {
-            await ibzTokenContract.transfer(allocation3, web3.utils.toWei('1000000'), {from: allocation2});
-        } catch (err) {
-            assert.equal(err.reason, 'Wait for vesting day!');
-        }
+        // try {
+        await ibzTokenContract.transfer(allocation3, web3.utils.toWei('1000000'), {from: allocation2});
+        // } catch (err) {
+        //     assert.equal(err.reason, 'Wait for vesting day!');
+        // }
         
-        // console.log((await instance.balanceOf(allocation2)).toString())
-        // console.log((await instance.balanceOf(allocation3)).toString())
+        console.log((await ibzTokenContract.balanceOf(allocation2)).toString())
+        console.log((await ibzTokenContract.balanceOf(allocation3)).toString())
 
-        try {
-            await ibzTokenContract.transfer(allocation2, web3.utils.toWei('1000000'), {from: allocation3});
-        } catch (err) {
-            assert.equal(err.reason, 'Wait for vesting day!');
-        }
+        // try {
+        await ibzTokenContract.transfer(allocation2, web3.utils.toWei('1000000'), {from: allocation3});
+        // } catch (err) {
+        //     assert.equal(err.reason, 'Wait for vesting day!');
+        // }
 
-        // console.log((await instance.balanceOf(allocation2)).toString())
-        // console.log((await instance.balanceOf(allocation3)).toString())
+        console.log((await ibzTokenContract.balanceOf(allocation2)).toString())
+        console.log((await ibzTokenContract.balanceOf(allocation3)).toString())
     });
 
     it("should put 1000000 token account 3", () => {
@@ -236,7 +207,7 @@ contract("IbizaVesting Test", accounts => {
                 assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
             });
     });
-
+*/
     it("should get months", () => {
         return IbizaVesting.deployed()
             .then(async (instance) => instance.getMonths.call(0, 0))
@@ -289,23 +260,23 @@ contract("IbizaVesting Test", accounts => {
             6: '14 months delay + 4% every 30 days'
         };
 
-        for (let x = 3; x < 10; x ++) {
+        for (let x = 0; x < 7; x ++) {
             let lastTransferableAmount = '';
             for (let i = 0; i < 70; i ++) {
                 //const day = 1613347200000 + (i * 30) * _oneDay;
-                const day = 1625389686000 + (i * 30) * oneDay;  // 15 days after release time
+                const day = 1626599506000 + (i * 30) * oneDay;  // 15 days after release time
 
                 await advanceBlockAtTime(releaseTime + (i * 30) * oneDay);
 
                 let timestamp = await instance.getTimestamp.call()
-                let transferable = await instance.getTransferableAmount.call(accounts[x])
-                let rest = await instance.getRestAmount.call(accounts[x])
-                let canTransfer = await instance.canTransfer.call(accounts[x], transferable)
+                let transferable = await instance.getTransferableAmount.call(x)
+                let rest = await instance.getRestAmount.call(x)
+                let canTransfer = await instance.canTransfer.call(x, transferable)
 
                 if (lastTransferableAmount !== transferable.toString()) {
-                    console.log(`${types[x-3]} ${x}. account`, new Date(day), new Date(timestamp.toNumber() * 1000), (i + 1) + '. month', (i * 30) + '. day', 
-                            'Transferable amount: ' + web3.utils.fromWei(transferable.toString()), 'Rest: ' + web3.utils.fromWei(rest.toString()), 
-                            'Can transfer: ' + canTransfer.toString());
+                    console.log(`${types[x]} ${x}. box`, new Date(day), new Date(timestamp.toNumber() * 1000), (i + 1) + '. month - ', (i * 30) + '. day - ', 
+                            'Transferable amount: ' + web3.utils.fromWei(transferable.toString()), ' - Rest: ' + web3.utils.fromWei(rest.toString()), 
+                            ' - Can transfer: ' + canTransfer.toString());
                     lastTransferableAmount = transferable.toString();
                 } else {
                     continue;

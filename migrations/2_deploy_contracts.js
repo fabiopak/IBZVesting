@@ -33,7 +33,7 @@ module.exports = async function (deployer, network, accounts) {
     const vestingInstance = await deployProxy(IbizaVesting, [tokenInstance.address], { from: accounts[0] });
     console.log("Ibiza Token Vesting Address: " + vestingInstance.address);
 
-    await vestingInstance.setReleaseTime(1625245658, { from: accounts[0] });  // time in the future!!!
+    await vestingInstance.setReleaseTime(1625320706, { from: accounts[0] });  // time in the future!!!
 
   } else if (network == "kovan") {
   } else if (network == "mainnet") {
