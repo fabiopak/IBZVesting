@@ -107,45 +107,45 @@ contract("IbizaVesting Test", accounts => {
         await ibzTokenContract.approve(ibzVestingContract.address, web3.utils.toWei('100000000'), {from: tokenOwner});
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 0, {from: tokenOwner});
-        frozen = await ibzVestingContract.frozenWallets(0)
+        frozen = await ibzVestingContract.frozenBoxes(0)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(0)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 1, {from: tokenOwner});
-        frozen = await ibzVestingContract.frozenWallets(1)
+        frozen = await ibzVestingContract.frozenBoxes(1)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(1)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 2, {from: tokenOwner});
-        frozen = await ibzVestingContract.frozenWallets(2)
+        frozen = await ibzVestingContract.frozenBoxes(2)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(2)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 3, {from: tokenOwner});
-        frozen = await ibzVestingContract.frozenWallets(3)
+        frozen = await ibzVestingContract.frozenBoxes(3)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(3)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 4, {from: tokenOwner});
-        frozen = await ibzVestingContract.frozenWallets(4)
+        frozen = await ibzVestingContract.frozenBoxes(4)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(4)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 5, {from: tokenOwner});
-        frozen = await ibzVestingContract.frozenWallets(5)
+        frozen = await ibzVestingContract.frozenBoxes(5)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(5)).toString())
 
         await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 6, {from: tokenOwner});
-        frozen = await ibzVestingContract.frozenWallets(6)
+        frozen = await ibzVestingContract.frozenBoxes(6)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(6)).toString())
     });
 
@@ -187,6 +187,10 @@ contract("IbizaVesting Test", accounts => {
             })
     });
 
+    it("call emergency withdraw", async () => {
+        await ibzVestingContract.emergencyWithdraw(ibzTokenContract.address, 0);
+    });
+
     it("Vesting simulation", async () => {
         await advanceBlockAtTime(releaseTime + (2 * 30) * oneDay);
 
@@ -205,8 +209,10 @@ contract("IbizaVesting Test", accounts => {
             for (let i = 0; i < 70; i ++) {
                 //const day = 1613347200000 + (i * 30) * _oneDay;
                 const day = releaseTime + (15 * oneDay) + (i * 30) * oneDay;  // 15 days after release time
+                if(i == 0)
+                    console.log(day, releaseTime)
 
-                await advanceBlockAtTime(releaseTime + (i * 30) * oneDay);
+                await advanceBlockAtTime(releaseTime + (15 * oneDay) + (i * 30) * oneDay);
 
                 let timestamp = await ibzVestingContract.getTimestamp.call()
                 let transferable = await ibzVestingContract.getTransferableAmount.call(x)
@@ -223,14 +229,18 @@ contract("IbizaVesting Test", accounts => {
                         ' - Can transfer: ' + canTransfer.toString());
 
                 // Test the transfer
-                lastBalanceForRecipientAtIdx[x] = await ibzTokenContract.balanceOf(recipients[x]);
-                await ibzVestingContract.transferFromFrozenWallet(x, [recipients[x]], [transferable], {from: tokenOwner});
-                let newBalance = await ibzTokenContract.balanceOf(recipients[x]);
-                assert.equal(lastBalanceForRecipientAtIdx[x].add(transferable).toString(), newBalance.toString(), "Recipient did not received IBZ");
+                if (canTransfer) {
+                    lastBalanceForRecipientAtIdx[x] = await ibzTokenContract.balanceOf(recipients[x]);
+                    await ibzVestingContract.transferFromFrozenBox(x, [recipients[x]], [transferable], {from: tokenOwner});
+                    let newBalance = await ibzTokenContract.balanceOf(recipients[x]);
+                    assert.equal(lastBalanceForRecipientAtIdx[x].add(transferable).toString(), newBalance.toString(), "Recipient did not received IBZ");
+                } else {
+                    await expectRevert(ibzVestingContract.transferFromFrozenBox(x, [recipients[x]], [transferable], {from: tokenOwner}), "IBZVesting: can not transfer yet");
+                }
 
                 // If transferable is greater than 0, also tests for an invalid transfer
                 if (transferable > 0) {
-                    await expectRevert(ibzVestingContract.transferFromFrozenWallet(x, [recipients[x]], [transferable], {from: tokenOwner}), "IBZVesting: can not transfer yet");
+                    await expectRevert(ibzVestingContract.transferFromFrozenBox(x, [recipients[x]], [transferable], {from: tokenOwner}), "IBZVesting: can not transfer yet");
                 }
 
                 lastTransferableAmount = transferable.toString();
