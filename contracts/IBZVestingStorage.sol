@@ -10,6 +10,7 @@ contract IBZVestingStorage {
         uint startDay;
         uint afterDays;
         uint monthsDelay;
+        uint transferred;
     }
 
     struct VestingType {

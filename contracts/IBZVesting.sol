@@ -87,7 +87,8 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
             initialAmount,
             releaseTime.add(afterDays),
             afterDays,
-            monthsDelay
+            monthsDelay,
+            0
         );
 
         // Add wallet to frozen wallets
@@ -128,7 +129,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
     function getTransferableAmount(uint idxVest) public view returns (uint) {
         uint months = getMonths(frozenWallets[idxVest].afterDays, frozenWallets[idxVest].monthsDelay);
         uint monthlyTransferableAmount = frozenWallets[idxVest].monthlyAmount.mul(months);
-        uint transferableAmount = monthlyTransferableAmount.add(frozenWallets[idxVest].initialAmount);
+        uint transferableAmount = monthlyTransferableAmount.add(frozenWallets[idxVest].initialAmount).sub(frozenWallets[idxVest].transferred);
 
         if (transferableAmount > frozenWallets[idxVest].totalAmount) {
             return frozenWallets[idxVest].totalAmount;
@@ -152,6 +153,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
             uint amount = amounts[i];
             require(recipient != address(0), "recipients cannot be zero address");
             frozenWallets[idxVest].totalAmount = frozenWallets[idxVest].totalAmount.sub(amount);
+            frozenWallets[idxVest].transferred = frozenWallets[idxVest].transferred.add(amount);
             SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(tokenToBeVested), recipient, amount);
             // emit Transfer(address(this), recipient, amount);
         }
@@ -190,15 +192,12 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         //     return true;
         // }
 
-        uint balance = frozenWallets[idxVest].totalAmount;
-        uint restAmount = getRestAmount(idxVest);
+        // uint balance = frozenWallets[idxVest].totalAmount;
+        // uint restAmount = getRestAmount(idxVest);
         uint transfAmount = getTransferableAmount(idxVest);
+        uint transferred = frozenWallets[idxVest].transferred;
 
-        if (!isStarted(frozenWallets[idxVest].startDay) || balance.sub(amount) < restAmount) {
-            return false;
-        }
-
-        else if (amount <= transfAmount) {
+        if (amount <= transfAmount) {
             return true;
         }
 
