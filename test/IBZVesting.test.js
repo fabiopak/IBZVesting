@@ -5,7 +5,8 @@ const {
     time,
     balance,
     expectEvent,
-    expectRevert
+    expectRevert,
+    days
 } = require('@openzeppelin/test-helpers');
 const {
     expect
@@ -23,6 +24,7 @@ const IbizaVesting = artifacts.require("IBZVesting");
 //const releaseTime = 1611588600000;
 const oneDay = 86400000;
 const releaseTime = (Date.now() / 1000).toFixed(0) * 1000 + oneDay;  // release date is set to one day after the starting of the test
+const month = 60 * 60 * 24 * 30;
 //const _oneDay = 86400000;
 
 //Allocation Amount
@@ -151,7 +153,7 @@ contract("IbizaVesting Test", accounts => {
 
     it("should get months", () => {
         return IbizaVesting.deployed()
-            .then(async (instance) => instance.getMonths.call(0, 0))
+            .then(async (instance) => instance.getMonths.call(0, 0, 1 * month))
             .then((months) => {
                 assert.equal(months.toNumber(), 1, "test problem"); // current month release time
             })
@@ -161,7 +163,7 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + 30 * oneDay);
 
         return IbizaVesting.deployed()
-            .then(async (instance) =>  instance.getMonths.call(0, 0))
+            .then(async (instance) =>  instance.getMonths.call(0, 0, 1 * month))
             .then((months) => {
                 assert.equal(months.toNumber(), 2, "test problem");
             })
@@ -171,7 +173,7 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + 45 * oneDay);
 
         return IbizaVesting.deployed()
-            .then(async (instance) =>  instance.getMonths.call(0, 0))
+            .then(async (instance) =>  instance.getMonths.call(0, 0, 1 * month))
             .then((months) => {
                 assert.equal(months.toNumber(), 2, "test problem");
             })
@@ -181,7 +183,7 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + 60 * oneDay);
 
         return IbizaVesting.deployed()
-            .then(instance => instance.getMonths.call(0, 0))
+            .then(instance => instance.getMonths.call(0, 0, 1 * month))
             .then((months) => {
                 assert.equal(months.toNumber(), 3, "test problem");
             })
