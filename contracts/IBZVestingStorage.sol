@@ -19,6 +19,7 @@ contract IBZVestingStorage {
         uint afterDays;
         uint monthsDelay;
         bool vesting;
+        uint monthLength;
     }
 
     uint public releaseTime;
