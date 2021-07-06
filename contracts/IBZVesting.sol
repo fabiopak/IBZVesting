@@ -19,6 +19,19 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         tokenToBeVested = _tokenToVest;
 
         // all percentages are multiplied by 1e18
+        // 50M, 0 Days, 100% (100 * 1e18) - LBP
+        vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true)); 
+        // 50M, 3 months delay, 25% every 90 days - Early investors
+        vestingTypes.push(VestingType(25000000000000000000, 0, 90 days, 3, true)); 
+        // 80M, 0 Days,100% - Reserve Liquidity
+        vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true));
+        // 100M, 3 months delay, 8.3333% every 90 days - Core team and advisor
+        vestingTypes.push(VestingType(8333333333333333333, 0, 90 days, 3, true));
+        // 140M, 8.3333% every month - Strategic investor
+        vestingTypes.push(VestingType(8333333333333333333, 8333333333333333333, 30 days, 0, true));
+        // 580M, 2.083333% every month - Community
+        vestingTypes.push(VestingType(2083333333333333333, 2083333333333333333, 30 days, 0, true));
+        /*
         vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true)); // 0 Days 100% (100 * 1e18)
         vestingTypes.push(VestingType(8000000000000000000, 12000000000000000000, 30 days, 0, true)); // 12% TGE + 8% every 30 days
         vestingTypes.push(VestingType(6000000000000000000, 10000000000000000000, 30 days, 0, true)); // 10% TGE + 6% every 30 days
@@ -26,6 +39,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         vestingTypes.push(VestingType(5000000000000000000, 0, 30 days, 4, true)); // 4 months delay + 5% every 30 Days 
         vestingTypes.push(VestingType(2000000000000000000, 0, 30 days, 4, true)); // 4 months delay + 2% every 30 days
         vestingTypes.push(VestingType(4000000000000000000, 0, 30 days, 14, true)); // 14 months delay + 4% every 30 days
+        */
     }
 
     function setReleaseTime(uint _relTime) public onlyOwner {
@@ -38,6 +52,14 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
 
     function mulDiv(uint x, uint y, uint z) public pure returns (uint) {
         return x.mul(y).div(z);
+    }
+
+    function addVestingType(uint _perc0Days,    // percentage (scaled 1e18)
+            uint _percMonth,                    // month percentage (scaled 1e18)
+            uint _freqRelease,                  // distribution frequency (in days)
+            uint _delayMonth,                   // months delay (in month)
+            bool _vesting) external onlyOwner {
+        vestingTypes.push(VestingType(_perc0Days, _percMonth, _freqRelease, _delayMonth, _vesting)); 
     }
 
     function depositPerVestingType(uint[] memory totalAmounts, uint vestingTypeIndex) public onlyOwner {
@@ -78,7 +100,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
             totalAmount,
             monthlyAmount,
             initialAmount,
-            releaseTime.add(monthsDelay.mul(30 days)),
+            releaseTime.add(afterDays),
             afterDays,
             monthsDelay,
             0

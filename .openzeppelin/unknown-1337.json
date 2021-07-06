@@ -277,10 +277,452 @@
           }
         }
       }
+    },
+    "148777ddb89f6c1378fc7eb53788923388b5e099e7a684a15709bb2507aadcdc": {
+      "address": "0x9f34100044bcc27e4Dcc0E457d18fAE55f6816BF",
+      "txHash": "0x4f19f9c3883d30e6e9998dd4e33aa43c0b2e881582b7959d90cafeaa4246506f",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:24"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:29"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/GSN/ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:74"
+          },
+          {
+            "contract": "ERC20Upgradeable",
+            "label": "_balances",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:37"
+          },
+          {
+            "contract": "ERC20Upgradeable",
+            "label": "_allowances",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:39"
+          },
+          {
+            "contract": "ERC20Upgradeable",
+            "label": "_totalSupply",
+            "type": "t_uint256",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:41"
+          },
+          {
+            "contract": "ERC20Upgradeable",
+            "label": "_name",
+            "type": "t_string_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:43"
+          },
+          {
+            "contract": "ERC20Upgradeable",
+            "label": "_symbol",
+            "type": "t_string_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:44"
+          },
+          {
+            "contract": "ERC20Upgradeable",
+            "label": "_decimals",
+            "type": "t_uint8",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:45"
+          },
+          {
+            "contract": "ERC20Upgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)44_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:312"
+          }
+        ],
+        "types": {
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))"
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_uint8": {
+            "label": "uint8"
+          },
+          "t_array(t_uint256)44_storage": {
+            "label": "uint256[44]"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "c9d2c9928cedbe705ea028a6a7d2565baf0163bc29ea6ac6c9fbdd409f93c29c": {
+      "address": "0x8AB8841C40540638f72547EEb0c32f2e5B876378",
+      "txHash": "0x2ed449023394e499228c9bd559a7d0d4dc6921efa7365690da5dae63114bac6b",
+      "layout": {
+        "storage": [
+          {
+            "contract": "IBZVestingStorage",
+            "label": "releaseTime",
+            "type": "t_uint256",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:26"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "vestingCounter",
+            "type": "t_uint256",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:27"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "tokenToBeVested",
+            "type": "t_address",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:28"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "frozenBoxes",
+            "type": "t_mapping(t_uint256,t_struct(FrozenBox)1559_storage)",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:30"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "vestingTypes",
+            "type": "t_array(t_struct(VestingType)1570_storage)dyn_storage",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:31"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:24"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:29"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/GSN/ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:74"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "_paused",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:28"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:96"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_mapping(t_uint256,t_struct(FrozenBox)1559_storage)": {
+            "label": "mapping(uint256 => struct IBZVestingStorage.FrozenBox)"
+          },
+          "t_struct(FrozenBox)1559_storage": {
+            "label": "struct IBZVestingStorage.FrozenBox",
+            "members": [
+              {
+                "label": "frozenId",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "monthlyAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "initialAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "startDay",
+                "type": "t_uint256"
+              },
+              {
+                "label": "afterDays",
+                "type": "t_uint256"
+              },
+              {
+                "label": "monthsDelay",
+                "type": "t_uint256"
+              },
+              {
+                "label": "transferred",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_array(t_struct(VestingType)1570_storage)dyn_storage": {
+            "label": "struct IBZVestingStorage.VestingType[]"
+          },
+          "t_struct(VestingType)1570_storage": {
+            "label": "struct IBZVestingStorage.VestingType",
+            "members": [
+              {
+                "label": "monthlyRate",
+                "type": "t_uint256"
+              },
+              {
+                "label": "initialRate",
+                "type": "t_uint256"
+              },
+              {
+                "label": "afterDays",
+                "type": "t_uint256"
+              },
+              {
+                "label": "monthsDelay",
+                "type": "t_uint256"
+              },
+              {
+                "label": "vesting",
+                "type": "t_bool"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "23c27d3d85820a96e06a748b295112b0fbd8f2d6e134288777e6082db69f4e44": {
+      "address": "0x71138892bc23693c4d2fbC266A6f3543f285b1c7",
+      "txHash": "0xb2ce185d91a4506534d6af9c86b28d42bc61a5a8dfe241682d204eaa7b14e6b4",
+      "layout": {
+        "storage": [
+          {
+            "contract": "IBZVestingStorage",
+            "label": "releaseTime",
+            "type": "t_uint256",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:26"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "vestingCounter",
+            "type": "t_uint256",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:27"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "tokenToBeVested",
+            "type": "t_address",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:28"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "frozenBoxes",
+            "type": "t_mapping(t_uint256,t_struct(FrozenBox)1556_storage)",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:30"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "vestingTypes",
+            "type": "t_array(t_struct(VestingType)1567_storage)dyn_storage",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:31"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:24"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:29"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/GSN/ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:74"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "_paused",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:28"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:96"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_mapping(t_uint256,t_struct(FrozenBox)1556_storage)": {
+            "label": "mapping(uint256 => struct IBZVestingStorage.FrozenBox)"
+          },
+          "t_struct(FrozenBox)1556_storage": {
+            "label": "struct IBZVestingStorage.FrozenBox",
+            "members": [
+              {
+                "label": "frozenId",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "monthlyAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "initialAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "startDay",
+                "type": "t_uint256"
+              },
+              {
+                "label": "afterDays",
+                "type": "t_uint256"
+              },
+              {
+                "label": "monthsDelay",
+                "type": "t_uint256"
+              },
+              {
+                "label": "transferred",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_array(t_struct(VestingType)1567_storage)dyn_storage": {
+            "label": "struct IBZVestingStorage.VestingType[]"
+          },
+          "t_struct(VestingType)1567_storage": {
+            "label": "struct IBZVestingStorage.VestingType",
+            "members": [
+              {
+                "label": "monthlyRate",
+                "type": "t_uint256"
+              },
+              {
+                "label": "initialRate",
+                "type": "t_uint256"
+              },
+              {
+                "label": "afterDays",
+                "type": "t_uint256"
+              },
+              {
+                "label": "monthsDelay",
+                "type": "t_uint256"
+              },
+              {
+                "label": "vesting",
+                "type": "t_bool"
+              }
+            ]
+          }
+        }
+      }
     }
   },
   "admin": {
-    "address": "0x591c45Fc3d1B8ECEa183a757C9169E1389Cf833E",
-    "txHash": "0xf95c44b7279f6ebafdce05486a752a810aea10acfbb9143578447278ce5e9c61"
+    "address": "0xddE9972fe2D71D43e7683865FE7F760F2Ebb1c7D",
+    "txHash": "0xf9836665f7b97d1868181ecfe3e6c57551b123089220e061cbb5c99abdcd5331"
   }
 }
