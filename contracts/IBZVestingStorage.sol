@@ -5,21 +5,21 @@ contract IBZVestingStorage {
     struct FrozenBox {
         uint frozenId;
         uint totalAmount;
-        uint monthlyAmount;
+        uint unitPeriodAmount;
         uint initialAmount;
         uint startDay;
         uint afterDays;
-        uint monthsDelay;
+        uint unitPeriodDelay;
         uint transferred;
     }
 
     struct VestingType {
-        uint monthlyRate;
+        uint unitPeriodRate;
         uint initialRate;
         uint afterDays;
-        uint monthsDelay;
+        uint unitPeriodDelay;
         bool vesting;
-        uint monthLength;
+        uint unitPeriod;
     }
 
     uint public releaseTime;
