@@ -2,15 +2,15 @@
 pragma solidity 0.6.12;
 
 contract IBZVestingStorage {
-    struct FrozenWallet {
-        address wallet;
+    struct FrozenBox {
+        uint frozenId;
         uint totalAmount;
         uint monthlyAmount;
         uint initialAmount;
         uint startDay;
         uint afterDays;
-        bool scheduled;
         uint monthsDelay;
+        uint transferred;
     }
 
     struct VestingType {
@@ -21,6 +21,10 @@ contract IBZVestingStorage {
         bool vesting;
     }
 
-    mapping (address => FrozenWallet) public frozenWallets;
+    uint public releaseTime;
+    uint public vestingCounter;
+    address public tokenToBeVested;
+
+    mapping (uint256 => FrozenBox) public frozenBoxes;
     VestingType[] public vestingTypes;
 }

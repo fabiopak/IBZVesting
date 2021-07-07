@@ -1,22 +1,38 @@
-const IBZVesting = artifacts.require("IBZVesting");
+const {
+    BN,
+    constants,
+    ether,
+    time,
+    balance,
+    expectEvent,
+    expectRevert
+} = require('@openzeppelin/test-helpers');
+const {
+    expect
+} = require('chai');
 
-//const releaseTime = 1611588600000;
-const releaseTime = 1624266486000;  // future date
-const oneDay = 86400000;
-//const _oneDay = 86400000;
-/*
-const allocation1 = process.env.ALLOCATION_1
-const allocation2 = process.env.ALLOCATION_2
-const allocation3 = process.env.ALLOCATION_3
-const allocation4 = process.env.ALLOCATION_4
-const allocation5 = process.env.ALLOCATION_5
-const allocation6 = process.env.ALLOCATION_6
-const allocation7 = process.env.ALLOCATION_7
-//const allocation8 = process.env.ALLOCATION_8
-*/
+const timeMachine = require('ganache-time-traveler');
+
 const Web3 = require('web3');
 // Ganache UI on 8545
 const web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+
+const IbizaToken = artifacts.require("IbizaToken");
+const IbizaVesting = artifacts.require("IBZVesting");
+
+//const releaseTime = 1611588600000;
+const oneDay = 86400000;
+const releaseTime = (Date.now() / 1000).toFixed(0) * 1000 + oneDay;  // release date is set to one day after the starting of the test
+//const _oneDay = 86400000;
+
+//Allocation Amount
+const amount1 = process.env.AMOUNT_1
+const amount2 = process.env.AMOUNT_2
+const amount3 = process.env.AMOUNT_3
+const amount4 = process.env.AMOUNT_4
+const amount5 = process.env.AMOUNT_5
+const amount6 = process.env.AMOUNT_6
+const amount7 = process.env.AMOUNT_7
 
 const advanceBlockAtTime = (time) => {
     return new Promise((resolve, reject) => {
@@ -44,23 +60,24 @@ before(async () => {
     await advanceBlockAtTime(releaseTime);
 });
 
-contract("IBZVesting Test", accounts => {
 
-    const allocation1 = accounts[3]
-    const allocation2 = accounts[4]
-    const allocation3 = accounts[5]
-    const allocation4 = accounts[6]
-    const allocation5 = accounts[7]
-    const allocation6 = accounts[8]
-    const allocation7 = accounts[9]
+let ibzVestingContract, ibzTokenContract;
+
+contract("IbizaVesting Test", accounts => {
+    const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+    const tokenOwner = accounts[0]
+    const recipients = [accounts[3], accounts[4], accounts[5], accounts[6], accounts[7], accounts[8], accounts[9]]
+    let lastBalanceForRecipientAtIdx = [0, 0, 0, 0, 0, 0, 0]
     
-    // it('upgrade', async () => {
-    //   const IBZVesting = await deployProxy(IBZVesting);
-    //   assert.equal(await IBZVesting.getReleaseTime(), 1611588600, "not same")
-    // });
+    it('set new release time', async () => {
+        return IbizaVesting.deployed()
+        .then(async (instance) => {
+            await instance.setReleaseTime(releaseTime / 1000);
+        })
+    });
 
     it('pause', () => {
-        return IBZVesting.deployed()
+        return IbizaVesting.deployed()
             .then(async (instance) => {
                 await instance.pause(true)
                 console.log(await instance.paused());
@@ -68,124 +85,72 @@ contract("IBZVesting Test", accounts => {
     });
 
     it('unpause', () => {
-        return IBZVesting.deployed()
+        return IbizaVesting.deployed()
             .then(async (instance) => {
                 await instance.pause(false)
                 console.log(await instance.paused());
             })
     });
 
-    // it("shouldn't set wallets", () => {
-    //     const wallets = [accounts[0]];
-    //     const totalAmounts = ['10000000000000000000000000000'];
-
-    //     return IBZVesting.deployed()
-    //         .then(async instance => {
-
-    //             try {
-    //                 await instance.addAllocations(wallets, totalAmounts, '0', {from: accounts[0]})
-    //             } catch (err) {
-    //                 assert.equal(err.reason, 'Max total supply over');
-    //             }
-    //         })
-    // });
-    // it("should set wallets", async () => {
-    //     const instance = await IBZVesting.deployed();
-
-    //     for (const i in wallets) {
-    //         const wallet = wallets[i]
-    //         const amount = totalAmounts[i]
-
-    //         const a = await instance.addAllocations([wallet], [amount], i.toString(), {from: '0x67F5B9e57EaE4f5f32E98BB7D7D1fb8F90AcFb45'});
-    //     }
-    // });
-
     // console.log (accounts)
+    it("setup", async function () {
+        ibzVestingContract = await IbizaVesting.deployed();
+        expect(ibzVestingContract.address).to.be.not.equal(ZERO_ADDRESS);
+        expect(ibzVestingContract.address).to.match(/0x[0-9a-fA-F]{40}/);
 
-    it("should put 1000000 token account 1", () => {
-        return IBZVesting.deployed()
-            .then(async instance => instance.balanceOf.call(allocation1))
-            .then((balance) => {
-                assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
-            });
+        ibzTokenContract = await IbizaToken.deployed();
+        expect(ibzTokenContract.address).to.be.not.equal(ZERO_ADDRESS);
+        expect(ibzTokenContract.address).to.match(/0x[0-9a-fA-F]{40}/);
     });
 
-    it("should put 1000000 token account 2", () => {
-        return IBZVesting.deployed()
-            .then(instance => instance.balanceOf.call(allocation2))
-            .then((balance) => {
-                assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
-            });
-    });
+    it("send some tokens to vesting contract", async function () {
+        await ibzTokenContract.approve(ibzVestingContract.address, web3.utils.toWei('1000000000'), {from: tokenOwner});
 
-    it("shouldn't send token", async () => {
-        const instance = await IBZVesting.deployed();
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('50000000')], 0, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenBoxes(0)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(0)).toString())
 
-        // console.log((await web3.eth.getBlock()).timestamp)
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('50000000')], 1, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenBoxes(1)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(1)).toString())
 
-        await instance.approve(accounts[0], web3.utils.toWei('1000000'), {from: allocation1})
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('80000000')], 2, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenBoxes(2)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(2)).toString())
 
-        try {
-            await instance.transferFrom(allocation2, allocation3, web3.utils.toWei('1000000'), {from: accounts[0]});
-        } catch (err) {
-            assert.equal(err.reason, 'Wait for vesting day!');
-        }
-        
-        // console.log((await instance.balanceOf(allocation2)).toString())
-        // console.log((await instance.balanceOf(allocation3)).toString())
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('100000000')], 3, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenBoxes(3)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(3)).toString())
 
-        try {
-            await instance.transfer(allocation2, web3.utils.toWei('1000000'), {from: allocation2});
-        } catch (err) {
-            assert.equal(err.reason, 'Wait for vesting day!');
-        }
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('140000000')], 4, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenBoxes(4)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(4)).toString())
 
-        // console.log((await instance.balanceOf(allocation2)).toString())
-        // console.log((await instance.balanceOf(allocation3)).toString())
-    });
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('580000000')], 5, {from: tokenOwner});
+        frozen = await ibzVestingContract.frozenBoxes(5)
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log((await ibzVestingContract.getTransferableAmount(5)).toString())
 
-    it("should put 1000000 token account 3", () => {
-        return IBZVesting.deployed()
-            .then(instance => instance.balanceOf.call(allocation3))
-            .then((balance) => {
-                assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
-            });
-    });
-
-    it("should put 1000000 token account 4", () => {
-        return IBZVesting.deployed()
-            .then(instance => instance.balanceOf.call(allocation4))
-            .then((balance) => {
-                assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
-            });
-    });
-
-    it("should put 1000000 token account 5", () => {
-        return IBZVesting.deployed()
-            .then(instance => instance.balanceOf.call(allocation5))
-            .then((balance) => {
-                assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
-            });
-    });
-
-    it("should put 1000000 token account 6", () => {
-        return IBZVesting.deployed()
-            .then(instance => instance.balanceOf.call(allocation6))
-            .then((balance) => {
-                assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
-            });
-    });
-
-    it("should put 1000000 token account 7", () => {
-        return IBZVesting.deployed()
-            .then(instance => instance.balanceOf.call(allocation7))
-            .then((balance) => {
-                assert.equal(balance.toString(), web3.utils.toWei('1000000'), "test problem");
-            });
+        // await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 6, {from: tokenOwner});
+        // frozen = await ibzVestingContract.frozenBoxes(6)
+        // console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+        //     frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        // console.log((await ibzVestingContract.getTransferableAmount(6)).toString())
     });
 
     it("should get months", () => {
-        return IBZVesting.deployed()
+        return IbizaVesting.deployed()
             .then(async (instance) => instance.getMonths.call(0, 0))
             .then((months) => {
                 assert.equal(months.toNumber(), 1, "test problem"); // current month release time
@@ -195,7 +160,7 @@ contract("IBZVesting Test", accounts => {
     it("should increase 30 days", async () => {
         await advanceBlockAtTime(releaseTime + 30 * oneDay);
 
-        return IBZVesting.deployed()
+        return IbizaVesting.deployed()
             .then(async (instance) =>  instance.getMonths.call(0, 0))
             .then((months) => {
                 assert.equal(months.toNumber(), 2, "test problem");
@@ -205,7 +170,7 @@ contract("IBZVesting Test", accounts => {
     it("should increase 45 days", async () => {
         await advanceBlockAtTime(releaseTime + 45 * oneDay);
 
-        return IBZVesting.deployed()
+        return IbizaVesting.deployed()
             .then(async (instance) =>  instance.getMonths.call(0, 0))
             .then((months) => {
                 assert.equal(months.toNumber(), 2, "test problem");
@@ -215,17 +180,20 @@ contract("IBZVesting Test", accounts => {
     it("should increase 60 days", async () => {
         await advanceBlockAtTime(releaseTime + 60 * oneDay);
 
-        return IBZVesting.deployed()
+        return IbizaVesting.deployed()
             .then(instance => instance.getMonths.call(0, 0))
             .then((months) => {
                 assert.equal(months.toNumber(), 3, "test problem");
             })
     });
 
-    it("transfer logs", async () => {
-        const instance = await IBZVesting.deployed();
-        await advanceBlockAtTime(releaseTime + (2 * 30) * oneDay);
+    it("call emergency withdraw", async () => {
+        await ibzVestingContract.emergencyWithdraw(ibzTokenContract.address, 0);
+    });
 
+    it("Vesting simulation", async () => {
+        await advanceBlockAtTime(releaseTime + (2 * 30) * oneDay);
+/*
         const types = {
             0: '0 Days 100%',
             1: '12% TGE + 8% every 30 days',
@@ -235,28 +203,56 @@ contract("IBZVesting Test", accounts => {
             5: '4 months delay + 2% every 30 days',
             6: '14 months delay + 4% every 30 days'
         };
+*/
+        const types = {
+            0: '50M, 0 Days, 100% TGE - LBP',
+            1: '50M, 3 months delay, 25% every 90 days - Early Investors',
+            2: '80M, 0 Days, 100% TGE - Reserve Liquidity',
+            3: '100M, 3 months delay, 8.3333% every 90 days - Core team and advisor',
+            4: '140M, 8.3333% every month - Strategic investor',
+            5: '580M, 2.083333% every month - Community'
+        };
 
-        for (let x = 3; x < 10; x ++) {
+        for (let x = 0; x < 6; x ++) {
             let lastTransferableAmount = '';
             for (let i = 0; i < 70; i ++) {
                 //const day = 1613347200000 + (i * 30) * _oneDay;
-                const day = 1625389686000 + (i * 30) * oneDay;  // 15 days after release time
+                const day = releaseTime + (15 * oneDay) + (i * 30) * oneDay;  // 15 days after release time
+                if(i == 0)
+                    console.log(day, releaseTime)
 
-                await advanceBlockAtTime(releaseTime + (i * 30) * oneDay);
+                await advanceBlockAtTime(releaseTime + (15 * oneDay) + (i * 30) * oneDay);
 
-                let timestamp = await instance.getTimestamp.call()
-                let transferable = await instance.getTransferableAmount.call(accounts[x])
-                let rest = await instance.getRestAmount.call(accounts[x])
-                let canTransfer = await instance.canTransfer.call(accounts[x], transferable)
+                let timestamp = await ibzVestingContract.getTimestamp.call()
+                let transferable = await ibzVestingContract.getTransferableAmount.call(x)
+                let rest = await ibzVestingContract.getRestAmount.call(x)
+                let canTransfer = await ibzVestingContract.canTransfer.call(x, transferable)
 
-                if (lastTransferableAmount !== transferable.toString()) {
-                    console.log(`${types[x-3]} ${x}. account`, new Date(day), new Date(timestamp.toNumber() * 1000), (i + 1) + '. month', (i * 30) + '. day', 
-                            'Transferable amount: ' + web3.utils.fromWei(transferable.toString()), 'Rest: ' + web3.utils.fromWei(rest.toString()), 
-                            'Can transfer: ' + canTransfer.toString());
-                    lastTransferableAmount = transferable.toString();
-                } else {
+                if (transferable.toString() == '0' && rest.toString() == '0') {
                     continue;
                 }
+
+                // log
+                console.log(`${types[x]} ${x}. box`, new Date(day), new Date(timestamp.toNumber() * 1000), (i + 1) + '. month - ', (i * 30) + '. day - ', 
+                        'Transferable amount: ' + web3.utils.fromWei(transferable.toString()), ' - Rest: ' + web3.utils.fromWei(rest.toString()), 
+                        ' - Can transfer: ' + canTransfer.toString());
+
+                // Test the transfer
+                if (canTransfer) {
+                    lastBalanceForRecipientAtIdx[x] = await ibzTokenContract.balanceOf(recipients[x]);
+                    await ibzVestingContract.transferFromFrozenBox(x, [recipients[x]], [transferable], {from: tokenOwner});
+                    let newBalance = await ibzTokenContract.balanceOf(recipients[x]);
+                    assert.equal(lastBalanceForRecipientAtIdx[x].add(transferable).toString(), newBalance.toString(), "Recipient did not received IBZ");
+                } else {
+                    await expectRevert(ibzVestingContract.transferFromFrozenBox(x, [recipients[x]], [transferable], {from: tokenOwner}), "IBZVesting: can not transfer yet");
+                }
+
+                // If transferable is greater than 0, also tests for an invalid transfer
+                if (transferable > 0) {
+                    await expectRevert(ibzVestingContract.transferFromFrozenBox(x, [recipients[x]], [transferable], {from: tokenOwner}), "IBZVesting: can not transfer yet");
+                }
+
+                lastTransferableAmount = transferable.toString();
             }
         }
     });
