@@ -19,18 +19,19 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         tokenToBeVested = _tokenToVest;
 
         // all percentages are multiplied by 1e18
-        // 50M, 0 Days, 100% (100 * 1e18) - LBP
-        vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true, 30 days)); 
-        // 50M, 3 months delay, 25% every 90 days - Early investors
-        vestingTypes.push(VestingType(25000000000000000000, 0, 0, 1, true, 90 days)); 
+        // 580M, 2.083333% every month - Community
+        vestingTypes.push(VestingType(2083333333333333334, 2083333333333333333, 0, 0, true, 30 days));
+        // 140M, 8.3333% every month - Strategic investor
+        vestingTypes.push(VestingType(8333333333333333334, 8333333333333333333, 0, 0, true, 30 days));
+        // 100M, 3 months delay, 8.3333% every 90 days, 2.77777% every month - Core team and advisor
+        vestingTypes.push(VestingType(2777777777777777778, 2777777777777777777, 0, 0, true, 30 days));
         // 80M, 0 Days,100% - Reserve Liquidity
         vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true, 30 days));
-        // 100M, 3 months delay, 8.3333% every 90 days - Core team and advisor
-        vestingTypes.push(VestingType(8333333333333333333, 0, 0, 1, true, 90 days));
-        // 140M, 8.3333% every month - Strategic investor
-        vestingTypes.push(VestingType(8333333333333333333, 8333333333333333333, 0, 0, true, 30 days));
-        // 580M, 2.083333% every month - Community
-        vestingTypes.push(VestingType(2083333333333333333, 2083333333333333333, 0, 0, true, 30 days));
+        // 50M, 0 Days, 100% (100 * 1e18) - LBP
+        // vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true, 30 days)); 
+        // 50M, 3 months delay, 25% every 90 days - Early investors
+        // vestingTypes.push(VestingType(8333333333333333333, 0, 0, 0, true, 30 days)); 
+ 
         /*
         vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true)); // 0 Days 100% (100 * 1e18)
         vestingTypes.push(VestingType(8000000000000000000, 12000000000000000000, 30 days, 0, true)); // 12% TGE + 8% every 30 days
@@ -79,12 +80,13 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
 
         for(uint i = 0; i < totalAmounts.length; i++) {
             uint totalAmount = totalAmounts[i];
-            uint monthlyAmount = mulDiv(totalAmounts[i], vestingType.monthlyRate, 100000000000000000000);  // amount * MonthlyRate / 100
+            // uint periodFrequency = vestingType.frequency;
+            uint monthlyAmount = mulDiv(totalAmounts[i], vestingType.periodRate, 100000000000000000000);  // amount * periodRate / 100
             uint initialAmount = mulDiv(totalAmounts[i], vestingType.initialRate, 100000000000000000000);  // amount * MonthlyRate / 100
             uint afterDay = vestingType.afterDays;
             uint monthsDelay = vestingType.monthsDelay;
 
-            addFrozenBox(totalAmount, monthlyAmount, initialAmount, afterDay, monthsDelay);
+            addFrozenBox(totalAmount, monthlyAmount, initialAmount, afterDay, monthsDelay/*, periodFrequency*/);
 
             vestingCounter = vestingCounter.add(1);
         }
@@ -101,7 +103,8 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
             totalAmount,
             monthlyAmount,
             initialAmount,
-            releaseTime.add(afterDays),
+            releaseTime.add(monthsDelay.mul(30 days)),
+            // releaseTime.add(afterDays),
             afterDays,
             monthsDelay,
             0
@@ -169,7 +172,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         for (uint i = 0; i < recipients.length; i++) {
             address recipient = recipients[i];
             uint amount = amounts[i];
-            require(recipient != address(0), "recipients cannot be zero address");
+            require(recipient != address(0), "IBZVesting: recipients cannot be zero address");
             frozenBoxes[idxVest].totalAmount = frozenBoxes[idxVest].totalAmount.sub(amount);
             frozenBoxes[idxVest].transferred = frozenBoxes[idxVest].transferred.add(amount);
             SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(tokenToBeVested), recipient, amount);

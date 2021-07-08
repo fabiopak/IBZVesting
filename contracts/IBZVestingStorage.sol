@@ -14,10 +14,11 @@ contract IBZVestingStorage {
     }
 
     struct VestingType {
-        uint monthlyRate;
+        uint periodRate;
         uint initialRate;
         uint afterDays;
         uint monthsDelay;
+        // uint frequency;
         bool vesting;
         uint monthLength;
     }
