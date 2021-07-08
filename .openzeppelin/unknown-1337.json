@@ -1171,8 +1171,8 @@
       }
     },
     "b75745a48455e2ea9bf3fb19fc1c37bd911d6004c79ab1607eb41fecc44cf16c": {
-      "address": "0xe5F9d5F7e046b7B14c957bd52deCFE01EDd833ba",
-      "txHash": "0x35409e3622e99bec1637a2a8fbe573bc81f903912db26671f974dad843925b1c",
+      "address": "0x5e1C02cC5F77479Ce4af6C44E0866b696722F1cf",
+      "txHash": "0x837ec990a64921d63350f7bc4bc4888e8958e80243c25b850da90f2dfade6e9a",
       "layout": {
         "storage": [
           {
@@ -1619,10 +1619,179 @@
           }
         }
       }
+    },
+    "e0333858a8534f4a8da10ba02354f5d83d11ed1972ca3e0411cb2b0b81fbc2a3": {
+      "address": "0x374064cB182D285465010a41fc6d3A928Cd91cA9",
+      "txHash": "0x12ff1a460d6c137fd60269828f6a44ae63af98f3e454ad585c5c9eb8240b6ba7",
+      "layout": {
+        "storage": [
+          {
+            "contract": "IBZVestingStorage",
+            "label": "releaseTime",
+            "type": "t_uint256",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:27"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "vestingCounter",
+            "type": "t_uint256",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:28"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "tokenToBeVested",
+            "type": "t_address",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:29"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "frozenBoxes",
+            "type": "t_mapping(t_uint256,t_struct(FrozenBox)1541_storage)",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:31"
+          },
+          {
+            "contract": "IBZVestingStorage",
+            "label": "vestingTypes",
+            "type": "t_array(t_struct(VestingType)1554_storage)dyn_storage",
+            "src": "../project:/.coverage_contracts/IBZVestingStorage.sol:32"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:24"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol:29"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/GSN/ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:20"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:74"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "_paused",
+            "type": "t_bool",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:28"
+          },
+          {
+            "contract": "PausableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "../project:/lib/@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol:96"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_mapping(t_uint256,t_struct(FrozenBox)1541_storage)": {
+            "label": "mapping(uint256 => struct IBZVestingStorage.FrozenBox)"
+          },
+          "t_struct(FrozenBox)1541_storage": {
+            "label": "struct IBZVestingStorage.FrozenBox",
+            "members": [
+              {
+                "label": "frozenId",
+                "type": "t_uint256"
+              },
+              {
+                "label": "totalAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "unitPeriodAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "initialAmount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "startDay",
+                "type": "t_uint256"
+              },
+              {
+                "label": "afterDays",
+                "type": "t_uint256"
+              },
+              {
+                "label": "unitPeriodDelay",
+                "type": "t_uint256"
+              },
+              {
+                "label": "transferred",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_array(t_struct(VestingType)1554_storage)dyn_storage": {
+            "label": "struct IBZVestingStorage.VestingType[]"
+          },
+          "t_struct(VestingType)1554_storage": {
+            "label": "struct IBZVestingStorage.VestingType",
+            "members": [
+              {
+                "label": "unitPeriodRate",
+                "type": "t_uint256"
+              },
+              {
+                "label": "initialRate",
+                "type": "t_uint256"
+              },
+              {
+                "label": "afterDays",
+                "type": "t_uint256"
+              },
+              {
+                "label": "unitPeriodDelay",
+                "type": "t_uint256"
+              },
+              {
+                "label": "vesting",
+                "type": "t_bool"
+              },
+              {
+                "label": "unitPeriod",
+                "type": "t_uint256"
+              }
+            ]
+          }
+        }
+      }
     }
   },
   "admin": {
-    "address": "0x20f8B4343d7cA483CC5E7e60aa002631D64AFD18",
-    "txHash": "0x3213aaff7a4db2f26552b3a3a7dc9c9281a7749b09b64541eeb242159082263b"
+    "address": "0x5E6834aB04b4F40f48093219d314e3327eB604f7",
+    "txHash": "0xc10a4fcf72c1d60d0e0ac2cdae424b475155040be934c3fb73a41cbf2154891b"
   }
 }

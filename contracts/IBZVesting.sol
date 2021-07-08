@@ -31,7 +31,10 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         // vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true, 30 days)); 
         // 50M, 3 months delay, 25% every 90 days - Early investors
         // vestingTypes.push(VestingType(8333333333333333333, 0, 0, 0, true, 30 days)); 
- 
+
+        // 580M, 0.4861111% every week - Community
+        // vestingTypes.push(VestingType(486111111111111111, 0, 0, 0, true, 7 days));
+
         /*
         vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true)); // 0 Days 100% (100 * 1e18)
         vestingTypes.push(VestingType(8000000000000000000, 12000000000000000000, 30 days, 0, true)); // 12% TGE + 8% every 30 days
@@ -56,12 +59,12 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
     }
 
     function addVestingType(uint _perc0Days,    // percentage (scaled 1e18)
-            uint _percMonth,                    // month percentage (scaled 1e18)
+            uint _percUnitPeriod,               // unit period percentage (scaled 1e18)
             uint _freqRelease,                  // distribution frequency (in days)
-            uint _delayMonth,                   // months delay (in month)
+            uint _unitPeriodDelay,              // delays expressed in unit period
             bool _vesting,
-            uint _monthLength) external onlyOwner {
-        vestingTypes.push(VestingType(_perc0Days, _percMonth, _freqRelease, _delayMonth, _vesting, _monthLength)); 
+            uint _unitPeriod) external onlyOwner {
+        vestingTypes.push(VestingType(_perc0Days, _percUnitPeriod, _freqRelease, _unitPeriodDelay, _vesting, _unitPeriod)); 
     }
 
     function depositPerVestingType(uint[] memory totalAmounts, uint vestingTypeIndex) public onlyOwner {
@@ -80,13 +83,19 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
 
         for(uint i = 0; i < totalAmounts.length; i++) {
             uint totalAmount = totalAmounts[i];
-            // uint periodFrequency = vestingType.frequency;
-            uint monthlyAmount = mulDiv(totalAmounts[i], vestingType.periodRate, 100000000000000000000);  // amount * periodRate / 100
-            uint initialAmount = mulDiv(totalAmounts[i], vestingType.initialRate, 100000000000000000000);  // amount * MonthlyRate / 100
-            uint afterDay = vestingType.afterDays;
-            uint monthsDelay = vestingType.monthsDelay;
 
-            addFrozenBox(totalAmount, monthlyAmount, initialAmount, afterDay, monthsDelay/*, periodFrequency*/);
+            // uint periodFrequency = vestingType.frequency;
+            // uint monthlyAmount = mulDiv(totalAmounts[i], vestingType.periodRate, 100000000000000000000);  // amount * periodRate / 100
+            // uint initialAmount = mulDiv(totalAmounts[i], vestingType.initialRate, 100000000000000000000);  // amount * MonthlyRate / 100
+
+            uint unitPeriodAmount = mulDiv(totalAmounts[i], vestingType.unitPeriodRate, 100000000000000000000);  // amount * unitPeriodRate / 100
+            uint initialAmount = mulDiv(totalAmounts[i], vestingType.initialRate, 100000000000000000000);  // amount * unitPeriodRate / 100
+
+            uint afterDay = vestingType.afterDays;
+            uint unitPeriodDelay = vestingType.unitPeriodDelay;
+
+            // addFrozenBox(totalAmount, monthlyAmount, initialAmount, afterDay, monthsDelay/*, periodFrequency*/);
+            addFrozenBox(totalAmount, unitPeriodAmount, initialAmount, afterDay, unitPeriodDelay);
 
             vestingCounter = vestingCounter.add(1);
         }
@@ -94,19 +103,19 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         return true;
     }
 
-    function addFrozenBox(uint totalAmount, uint monthlyAmount, uint initialAmount, uint afterDays, uint monthsDelay) internal {
+    function addFrozenBox(uint totalAmount, uint unitPeriodAmount, uint initialAmount, uint afterDays, uint unitPeriodDelay) internal {
         uint releaseTime = getReleaseTime();
 
         // Create frozen wallets
         FrozenBox memory frozenBox = FrozenBox(
             vestingCounter,
             totalAmount,
-            monthlyAmount,
+            unitPeriodAmount,
             initialAmount,
-            releaseTime.add(monthsDelay.mul(30 days)),
-            // releaseTime.add(afterDays),
+            // releaseTime.add(monthsDelay.mul(30 days)),
+            releaseTime.add(afterDays),
             afterDays,
-            monthsDelay,
+            unitPeriodDelay,
             0
         );
 
@@ -118,7 +127,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         return block.timestamp;
     }
 
-    function getMonths(uint afterDays, uint monthsDelay, uint monthLength) public view returns (uint) {
+    function getUnitPeriods(uint afterDays, uint unitPeriodDelay, uint unitPeriod) public view returns (uint) {
         uint releaseTime = getReleaseTime();
         uint time = releaseTime.add(afterDays);
 
@@ -127,12 +136,12 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         }
 
         uint diff = block.timestamp.sub(time);
-        uint tmpdiff = diff.div(monthLength).add(1);
-        uint months;
-        if (tmpdiff >= monthsDelay)
-            months = diff.div(monthLength).add(1).sub(monthsDelay);
+        uint tmpdiff = diff.div(unitPeriod).add(1);
+        uint periods;
+        if (tmpdiff >= unitPeriodDelay)
+            periods = diff.div(unitPeriod).add(1).sub(unitPeriodDelay);
 
-        return months;
+        return periods;
     }
 
     function isStarted(uint startDay) public view returns (bool) {
@@ -148,9 +157,9 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
     function getTransferableAmount(uint idxVest) public view returns (uint) {
         VestingType memory vestingType = vestingTypes[idxVest];
 
-        uint months = getMonths(frozenBoxes[idxVest].afterDays, frozenBoxes[idxVest].monthsDelay, vestingType.monthLength);
-        uint monthlyTransferableAmount = frozenBoxes[idxVest].monthlyAmount.mul(months);
-        uint transferableAmount = monthlyTransferableAmount.add(frozenBoxes[idxVest].initialAmount).sub(frozenBoxes[idxVest].transferred);
+        uint periods = getUnitPeriods(frozenBoxes[idxVest].afterDays, frozenBoxes[idxVest].unitPeriodDelay, vestingType.unitPeriod);
+        uint unitPeriodTransferableAmount = frozenBoxes[idxVest].unitPeriodAmount.mul(periods);
+        uint transferableAmount = unitPeriodTransferableAmount.add(frozenBoxes[idxVest].initialAmount).sub(frozenBoxes[idxVest].transferred);
 
         if (transferableAmount > frozenBoxes[idxVest].totalAmount) {
             return frozenBoxes[idxVest].totalAmount;

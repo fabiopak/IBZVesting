@@ -159,7 +159,7 @@ contract("IbizaVesting Test", accounts => {
 
     it("should get months", () => {
         return IbizaVesting.deployed()
-            .then(async (instance) => instance.getMonths.call(0, 0, 1 * month))
+            .then(async (instance) => instance.getUnitPeriods.call(0, 0, 1 * month))
             .then((months) => {
                 assert.equal(months.toNumber(), 1, "test problem"); // current month release time
             })
@@ -169,7 +169,7 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + 30 * oneDay);
 
         return IbizaVesting.deployed()
-            .then(async (instance) =>  instance.getMonths.call(0, 0, 1 * month))
+            .then(async (instance) =>  instance.getUnitPeriods.call(0, 0, 1 * month))
             .then((months) => {
                 assert.equal(months.toNumber(), 2, "test problem");
             })
@@ -179,7 +179,7 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + 45 * oneDay);
 
         return IbizaVesting.deployed()
-            .then(async (instance) =>  instance.getMonths.call(0, 0, 1 * month))
+            .then(async (instance) =>  instance.getUnitPeriods.call(0, 0, 1 * month))
             .then((months) => {
                 assert.equal(months.toNumber(), 2, "test problem");
             })
@@ -189,7 +189,7 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + 60 * oneDay);
 
         return IbizaVesting.deployed()
-            .then(instance => instance.getMonths.call(0, 0, 1 * month))
+            .then(instance => instance.getUnitPeriods.call(0, 0, 1 * month))
             .then((months) => {
                 assert.equal(months.toNumber(), 3, "test problem");
             })
@@ -210,14 +210,30 @@ contract("IbizaVesting Test", accounts => {
         };
 
         for (let x = 0; x < 4; x ++) {
+            let daysOffset = [15, 15, 15, 15, 15, 0];
+            let daysdelay = [30, 30, 30, 30, 30, 7];
+
             let lastTransferableAmount = '';
-            for (let i = 0; i < 70; i ++) {
+            
+            let checks = 0;
+            let periodStr = "";
+
+            if (daysdelay[x] == 30) {
+                checks = 70;
+                periodStr = "month";
+            }
+            else {
+                checks = 210;
+                periodStr = "week";
+            }
+
+            for (let i = 0; i < checks; i ++) {
                 //const day = 1613347200000 + (i * 30) * _oneDay;
-                const day = releaseTime + (15 * oneDay) + (i * 30) * oneDay;  // 15 days after release time
+                const day = releaseTime + (daysOffset[x] * oneDay) + (i * daysdelay[x]) * oneDay;  // 15 days after release time
                 if(i == 0)
                     console.log(day, releaseTime)
 
-                await advanceBlockAtTime(releaseTime + (15 * oneDay) + (i * 30) * oneDay);
+                await advanceBlockAtTime(day);
 
                 let timestamp = await ibzVestingContract.getTimestamp.call()
                 let transferable = await ibzVestingContract.getTransferableAmount.call(x)
@@ -229,7 +245,7 @@ contract("IbizaVesting Test", accounts => {
                 }
 
                 // log
-                console.log(`${types[x]} ${x}. box`, new Date(day), new Date(timestamp.toNumber() * 1000), (i + 1) + '. month - ', (i * 30) + '. day - ', 
+                console.log(`${types[x]} ${x}. box`, new Date(day), new Date(timestamp.toNumber() * 1000), (i + 1) + '.', periodStr, '- ', (i * daysdelay[x]) + '. day - ', 
                         'Transferable amount: ' + web3.utils.fromWei(transferable.toString()), ' - Rest: ' + web3.utils.fromWei(rest.toString()), 
                         ' - Can transfer: ' + canTransfer.toString());
 
