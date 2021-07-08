@@ -28,9 +28,9 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         // 100M, 3 months delay, 8.3333% every 90 days - Core team and advisor
         vestingTypes.push(VestingType(8333333333333333333, 0, 0, 1, true, 90 days));
         // 140M, 8.3333% every month - Strategic investor
-        vestingTypes.push(VestingType(8333333333333333333, 8333333333333333333, 0, 0, true, 30 days));
-        // 580M, 2.083333% every month - Community
-        vestingTypes.push(VestingType(2083333333333333333, 2083333333333333333, 0, 0, true, 30 days));
+        vestingTypes.push(VestingType(8333333333333333333, 0, 0, 0, true, 30 days));
+        // 580M, 0.4861111% every week - Community
+        vestingTypes.push(VestingType(486111111111111111, 0, 0, 0, true, 7 days));
         /*
         vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true)); // 0 Days 100% (100 * 1e18)
         vestingTypes.push(VestingType(8000000000000000000, 12000000000000000000, 30 days, 0, true)); // 12% TGE + 8% every 30 days
