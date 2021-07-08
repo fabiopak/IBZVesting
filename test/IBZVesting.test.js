@@ -106,41 +106,47 @@ contract("IbizaVesting Test", accounts => {
     it("send some tokens to vesting contract", async function () {
         await ibzTokenContract.approve(ibzVestingContract.address, web3.utils.toWei('1000000000'), {from: tokenOwner});
 
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('50000000')], 0, {from: tokenOwner});
+        // 580M, 2.083333% every month - Community
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('580000000')], 0, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(0)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(0)).toString())
 
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('50000000')], 1, {from: tokenOwner});
+        // 140M, 8.3333% every month - Strategic investor
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('140000000')], 1, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(1)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(1)).toString())
 
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('80000000')], 2, {from: tokenOwner});
+        // 100M, 3 months delay, 8.3333% every 90 days, 2.77777% every month - Core team and advisor
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('100000000')], 2, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(2)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(2)).toString())
 
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('100000000')], 3, {from: tokenOwner});
+        // 80M, 0 Days,100% - Reserve Liquidity
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('80000000')], 3, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(3)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(3)).toString())
 
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('140000000')], 4, {from: tokenOwner});
-        frozen = await ibzVestingContract.frozenBoxes(4)
-        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
-        console.log((await ibzVestingContract.getTransferableAmount(4)).toString())
+        // 50M, 0 Days, 100% (100 * 1e18) - LBP
+        // await ibzVestingContract.depositPerVestingType([web3.utils.toWei('50000000')], 4, {from: tokenOwner});
+        // frozen = await ibzVestingContract.frozenBoxes(4)
+        // console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+        //     frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        // console.log((await ibzVestingContract.getTransferableAmount(4)).toString())
 
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('580000000')], 5, {from: tokenOwner});
-        frozen = await ibzVestingContract.frozenBoxes(5)
-        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
-        console.log((await ibzVestingContract.getTransferableAmount(5)).toString())
+        // 50M, 3 months delay, 25% every 90 days - Early investors
+        // await ibzVestingContract.depositPerVestingType([web3.utils.toWei('50000000')], 5, {from: tokenOwner});
+        // frozen = await ibzVestingContract.frozenBoxes(5)
+        // console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
+        //     frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        // console.log((await ibzVestingContract.getTransferableAmount(5)).toString())
 
         // await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 6, {from: tokenOwner});
         // frozen = await ibzVestingContract.frozenBoxes(6)
@@ -193,27 +199,15 @@ contract("IbizaVesting Test", accounts => {
 
     it("Vesting simulation", async () => {
         await advanceBlockAtTime(releaseTime + (2 * 30) * oneDay);
-/*
+
         const types = {
-            0: '0 Days 100%',
-            1: '12% TGE + 8% every 30 days',
-            2: '10% TGE + 6% every 30 days',
-            3: '10% TGE + 6% every 30 days',
-            4: '4 months delay + 5% every 30 Days',
-            5: '4 months delay + 2% every 30 days',
-            6: '14 months delay + 4% every 30 days'
-        };
-*/
-        const types = {
-            0: '50M, 0 Days, 100% TGE - LBP',
-            1: '50M, 3 months delay, 25% every 90 days - Early Investors',
-            2: '80M, 0 Days, 100% TGE - Reserve Liquidity',
-            3: '100M, 3 months delay, 8.3333% every 90 days - Core team and advisor',
-            4: '140M, 8.3333% every month - Strategic investor',
-            5: '580M, 2.083333% every month - Community'
+            0: '580M, 2.083333% every month - Community',
+            1: '140M, 8.3333% every month - Strategic investor',
+            2: '100M, 2.7777% every month - Core team and advisor',
+            3: '50M, 100%, 0 Days - Reserve Liquidity'
         };
 
-        for (let x = 0; x < 6; x ++) {
+        for (let x = 0; x < 4; x ++) {
             let lastTransferableAmount = '';
             for (let i = 0; i < 70; i ++) {
                 //const day = 1613347200000 + (i * 30) * _oneDay;
@@ -233,9 +227,9 @@ contract("IbizaVesting Test", accounts => {
                 }
 
                 // log
-                console.log(`${types[x]} ${x}. box`, new Date(day), new Date(timestamp.toNumber() * 1000), (i + 1) + '. month - ', (i * 30) + '. day - ', 
-                        'Transferable amount: ' + web3.utils.fromWei(transferable.toString()), ' - Rest: ' + web3.utils.fromWei(rest.toString()), 
-                        ' - Can transfer: ' + canTransfer.toString());
+                console.log(`${types[x]} - ${x}. box`, new Date(day), new Date(timestamp.toNumber() * 1000), (i + 1) + '. month -', (i * 30) + '. day -', 
+                        'Transferable amount: ' + web3.utils.fromWei(transferable.toString()), '- Rest: ' + web3.utils.fromWei(rest.toString()), 
+                        '- Can transfer: ' + canTransfer.toString());
 
                 // Test the transfer
                 if (canTransfer) {
