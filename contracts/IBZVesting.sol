@@ -87,7 +87,8 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
             totalAmount,
             monthlyAmount,
             initialAmount,
-            releaseTime.add(afterDays),
+            releaseTime.add(monthsDelay * (30 days)),
+            // releaseTime.add(afterDays),
             afterDays,
             monthsDelay,
             0
