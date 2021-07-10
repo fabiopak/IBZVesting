@@ -106,29 +106,29 @@ contract("IbizaVesting Test", accounts => {
     it("send some tokens to vesting contract", async function () {
         await ibzTokenContract.approve(ibzVestingContract.address, web3.utils.toWei('1000000000'), {from: tokenOwner});
 
-        // 580M, 2.083333% every month - Community
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('580000000')], 0, {from: tokenOwner});
+        // 430M, 2.083333% every month (48 months) - Community
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('430000000')], 0, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(0)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(0)).toString())
 
-        // 140M, 8.3333% every month - Strategic investor
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('140000000')], 1, {from: tokenOwner});
+        // 150M, 16.66667% every month (6 months) - Farming & Co.
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('150000000')], 1, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(1)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(1)).toString())
 
-        // 100M, 3 months delay, 8.3333% every 90 days, 2.77777% every month - Core team and advisor
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('100000000')], 2, {from: tokenOwner});
+        // 140M, 3.57142857142857% every month (28 months) - Strategic investor
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('140000000')], 2, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(2)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
         console.log((await ibzVestingContract.getTransferableAmount(2)).toString())
 
-        // 80M, 0 Days,100% - Reserve Liquidity
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('80000000')], 3, {from: tokenOwner});
+        // 100M, 4.1666667% every month (24 months) - Core team and advisor
+        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('100000000')], 3, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(3)
         console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
             frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
@@ -201,10 +201,10 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + (2 * 30) * oneDay);
 
         const types = {
-            0: '580M, 2.083333% every month - Community',
-            1: '140M, 8.3333% every month - Strategic investor',
-            2: '100M, 2.7777% every month - Core team and advisor',
-            3: '50M, 100%, 0 Days - Reserve Liquidity'
+            0: '430M, 2.083333% every month (48 months) - Community',
+            1: '150M, 16.66667% every month (6 months) - Farming & Co.',
+            2: '140M, 3.57142857142857% every month (28 months) - Strategic investor',
+            3: '100M, 4.1666667% every month (24 months) - Core team and advisor'
         };
 
         for (let x = 0; x < 4; x ++) {
@@ -212,8 +212,8 @@ contract("IbizaVesting Test", accounts => {
             for (let i = 0; i < 70; i ++) {
                 //const day = 1613347200000 + (i * 30) * _oneDay;
                 const day = releaseTime + (15 * oneDay) + (i * 30) * oneDay;  // 15 days after release time
-                if(i == 0)
-                    console.log(day, releaseTime)
+                // if(i == 0)
+                //     console.log(day, releaseTime)
 
                 await advanceBlockAtTime(releaseTime + (15 * oneDay) + (i * 30) * oneDay);
 

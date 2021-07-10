@@ -19,14 +19,15 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         tokenToBeVested = _tokenToVest;
 
         // all percentages are multiplied by 1e18
-        // 580M, 2.083333% every month (48 months) - Community
+        // 430M, 2.083333% every month (48 months), 8.958.333,33 tokens/month - Community
         vestingTypes.push(VestingType(2083333333333333334, 2083333333333333333, 30 days, 0, true));
-        // 140M, 8.3333% every month (12 months) - Strategic investor
-        vestingTypes.push(VestingType(8333333333333333334, 8333333333333333333, 30 days, 0, true));
-        // 100M, 2.7777% every month (36 months)- Core team and advisor
-        vestingTypes.push(VestingType(2777777777777777778, 2777777777777777777, 30 days, 0, true));
-        // 80M, 0 Days,100% - Reserve Liquidity
-        vestingTypes.push(VestingType(100000000000000000000, 100000000000000000000, 0, 0, true));
+        // 150M, 16.66667% every month (6 months), 25.000.000 tokens/month - Farming & Co.
+        vestingTypes.push(VestingType(16666666666666666667, 16666666666666666667, 30 days, 0, true));
+        // 140M, 3.57142857142857% every month (28 months), 5.000.000 tokens/month - Strategic investor
+        vestingTypes.push(VestingType(3571428571428571429, 3571428571428571429, 30 days, 0, true));
+        // 100M, 4.1666667% every month (24 months), 4.166.666,67 token/month - Core team and advisor
+        vestingTypes.push(VestingType(4166666666666666667, 4166666666666666667, 30 days, 0, true));
+        
     }
 
     function setReleaseTime(uint _relTime) public onlyOwner {
