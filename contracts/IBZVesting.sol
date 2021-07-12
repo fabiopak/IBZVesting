@@ -19,15 +19,18 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         tokenToBeVested = _tokenToVest;
 
         // all percentages are multiplied by 1e18
-        // 430M, 2.083333% every month (48 months), 8.958.333,33 tokens/month - Community
+        // 2.083333% every month (48 months) - Community
         vestingTypes.push(VestingType(2083333333333333334, 2083333333333333333, 30 days, 0, true));
-        // 150M, 16.66667% every month (6 months), 25.000.000 tokens/month - Farming & Co.
+        // 16.66667% every month (6 months) - Farming & Co.
         vestingTypes.push(VestingType(16666666666666666667, 16666666666666666667, 30 days, 0, true));
-        // 140M, 3.57142857142857% every month (28 months), 5.000.000 tokens/month - Strategic investor
+        // 3.57142857142857% every month (28 months) - Strategic investor
         vestingTypes.push(VestingType(3571428571428571429, 3571428571428571429, 30 days, 0, true));
-        // 100M, 4.1666667% every month (24 months), 4.166.666,67 token/month - Core team and advisor
+        // 4.1666667% every month (24 months) - Core team and advisor
         vestingTypes.push(VestingType(4166666666666666667, 4166666666666666667, 30 days, 0, true));
-        
+        // 100% after 6 months
+        vestingTypes.push(VestingType(0, 100000000000000000000, 30 days, 6, true));
+        // 100% after 12 months
+        vestingTypes.push(VestingType(0, 100000000000000000000, 30 days, 12, true));
     }
 
     function setReleaseTime(uint _relTime) public onlyOwner {
@@ -45,9 +48,9 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
     function addVestingType(uint _perc0Days,    // percentage (scaled 1e18)
             uint _percMonth,                    // month percentage (scaled 1e18)
             uint _freqRelease,                  // distribution frequency (in days)
-            uint _delayMonth,                   // months delay (in month)
-            bool _vesting) external onlyOwner {
-        vestingTypes.push(VestingType(_perc0Days, _percMonth, _freqRelease, _delayMonth, _vesting)); 
+            uint _delayMonth                    // months delay (in month)
+            ) external onlyOwner {
+        vestingTypes.push(VestingType(_perc0Days, _percMonth, _freqRelease, _delayMonth, true)); 
     }
 
     function depositPerVestingType(uint[] memory totalAmounts, uint vestingTypeIndex) public onlyOwner {
@@ -59,22 +62,19 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         addAllocations(totalAmounts, vestingTypeIndex);
     }
 
-    function addAllocations(uint[] memory totalAmounts, uint vestingTypeIndex) public payable onlyOwner returns (bool) {
+    function addAllocations(uint memory totalAmounts, uint vestingTypeIndex) public payable onlyOwner returns (bool) {
         require(vestingTypes[vestingTypeIndex].vesting, "Vesting type isn't found");
 
         VestingType memory vestingType = vestingTypes[vestingTypeIndex];
 
-        for(uint i = 0; i < totalAmounts.length; i++) {
-            uint totalAmount = totalAmounts[i];
-            uint monthlyAmount = mulDiv(totalAmounts[i], vestingType.monthlyRate, 100000000000000000000);  // amount * MonthlyRate / 100
-            uint initialAmount = mulDiv(totalAmounts[i], vestingType.initialRate, 100000000000000000000);  // amount * MonthlyRate / 100
-            uint afterDay = vestingType.afterDays;
-            uint monthsDelay = vestingType.monthsDelay;
+        uint monthlyAmount = mulDiv(totalAmounts, vestingType.monthlyRate, 100000000000000000000);  // amount * MonthlyRate / 100
+        uint initialAmount = mulDiv(totalAmounts, vestingType.initialRate, 100000000000000000000);  // amount * MonthlyRate / 100
+        uint afterDay = vestingType.afterDays;
+        uint monthsDelay = vestingType.monthsDelay;
 
-            addFrozenBox(totalAmount, monthlyAmount, initialAmount, afterDay, monthsDelay);
+        addFrozenBox(totalAmount, monthlyAmount, initialAmount, afterDay, monthsDelay);
 
-            vestingCounter = vestingCounter.add(1);
-        }
+        vestingCounter = vestingCounter.add(1);
 
         return true;
     }
