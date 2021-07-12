@@ -107,45 +107,45 @@ contract("IbizaVesting Test", accounts => {
         await ibzTokenContract.approve(ibzVestingContract.address, web3.utils.toWei('1000000000'), {from: tokenOwner});
 
         // 430M, 2.083333% every month (48 months) - Community
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('430000000')], 0, {from: tokenOwner});
+        await ibzVestingContract.depositPerVestingType(web3.utils.toWei('430000000'), 0, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(0)
-        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), 
+            frozen[3].toString(), frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
         console.log((await ibzVestingContract.getTransferableAmount(0)).toString())
 
         // 150M, 16.66667% every month (6 months) - Farming & Co.
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('150000000')], 1, {from: tokenOwner});
+        await ibzVestingContract.depositPerVestingType(web3.utils.toWei('150000000'), 1, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(1)
-        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), 
+            frozen[3].toString(), frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
         console.log((await ibzVestingContract.getTransferableAmount(1)).toString())
 
         // 140M, 3.57142857142857% every month (28 months) - Strategic investor
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('140000000')], 2, {from: tokenOwner});
+        await ibzVestingContract.depositPerVestingType(web3.utils.toWei('140000000'), 2, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(2)
-        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), 
+            frozen[3].toString(), frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
         console.log((await ibzVestingContract.getTransferableAmount(2)).toString())
 
         // 100M, 4.1666667% every month (24 months) - Core team and advisor
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('100000000')], 3, {from: tokenOwner});
+        await ibzVestingContract.depositPerVestingType(web3.utils.toWei('100000000'), 3, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(3)
-        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), 
+            frozen[3].toString(), frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
         console.log((await ibzVestingContract.getTransferableAmount(3)).toString())
 
         // 50M, 6 months delay, 100% (100 * 1e18)
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('50000000')], 4, {from: tokenOwner});
+        await ibzVestingContract.depositPerVestingType(web3.utils.toWei('50000000'), 4, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(4)
-        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), 
+            frozen[3].toString(), frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
         console.log((await ibzVestingContract.getTransferableAmount(4)).toString())
 
         // 50M, 12 months delay, 100%
-        await ibzVestingContract.depositPerVestingType([web3.utils.toWei('50000000')], 5, {from: tokenOwner});
+        await ibzVestingContract.depositPerVestingType(web3.utils.toWei('50000000'), 5, {from: tokenOwner});
         frozen = await ibzVestingContract.frozenBoxes(5)
-        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), frozen[3].toString(), 
-            frozen[4].toString(), frozen[5].toString(), frozen[6].toString(), frozen[7].toString())
+        console.log(frozen[0].toString(), frozen[1].toString(), frozen[2].toString(), 
+            frozen[3].toString(), frozen[4].toString(), frozen[5].toString(), frozen[6].toString())
         console.log((await ibzVestingContract.getTransferableAmount(5)).toString())
 
         // await ibzVestingContract.depositPerVestingType([web3.utils.toWei('1000000')], 6, {from: tokenOwner});
@@ -155,9 +155,13 @@ contract("IbizaVesting Test", accounts => {
         // console.log((await ibzVestingContract.getTransferableAmount(6)).toString())
     });
 
+    it("should get months", async function () {
+        await ibzVestingContract.addVestingType(50000000000000000000n, 50000000000000000000n, 3);
+    });
+
     it("should get months", () => {
         return IbizaVesting.deployed()
-            .then(async (instance) => instance.getMonths.call(0, 0))
+            .then(async (instance) => instance.getMonths.call(/*0,*/ 0))
             .then((months) => {
                 assert.equal(months.toNumber(), 1, "test problem"); // current month release time
             })
@@ -167,7 +171,7 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + 30 * oneDay);
 
         return IbizaVesting.deployed()
-            .then(async (instance) =>  instance.getMonths.call(0, 0))
+            .then(async (instance) =>  instance.getMonths.call(/*0,*/ 0))
             .then((months) => {
                 assert.equal(months.toNumber(), 2, "test problem");
             })
@@ -177,7 +181,7 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + 45 * oneDay);
 
         return IbizaVesting.deployed()
-            .then(async (instance) =>  instance.getMonths.call(0, 0))
+            .then(async (instance) =>  instance.getMonths.call(/*0,*/ 0))
             .then((months) => {
                 assert.equal(months.toNumber(), 2, "test problem");
             })
@@ -187,7 +191,7 @@ contract("IbizaVesting Test", accounts => {
         await advanceBlockAtTime(releaseTime + 60 * oneDay);
 
         return IbizaVesting.deployed()
-            .then(instance => instance.getMonths.call(0, 0))
+            .then(instance => instance.getMonths.call(/*0,*/ 0))
             .then((months) => {
                 assert.equal(months.toNumber(), 3, "test problem");
             })

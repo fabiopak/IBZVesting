@@ -8,7 +8,7 @@ contract IBZVestingStorage {
         uint monthlyAmount;
         uint initialAmount;
         uint startDay;
-        uint afterDays;
+        // uint afterDays;
         uint monthsDelay;
         uint transferred;
     }
@@ -16,12 +16,12 @@ contract IBZVestingStorage {
     struct VestingType {
         uint monthlyRate;
         uint initialRate;
-        uint afterDays;
+        // uint periodLength;
         uint monthsDelay;
         bool vesting;
     }
 
-    uint public releaseTime;
+    uint public releaseTimeFixed;
     uint public vestingCounter;
     address public tokenToBeVested;
 
