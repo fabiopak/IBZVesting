@@ -221,6 +221,13 @@ contract("IbizaVesting Test", accounts => {
                 // if(i == 0)
                 //     console.log(day, releaseTime)
 
+                // Tries to transer from frozen box when it shouldn't be allowed
+                let testAmount = web3.utils.toWei('1000');
+                let canTransferBeforeTimePasses = await ibzVestingContract.canTransfer.call(x, testAmount);
+                if(!canTransferBeforeTimePasses) {
+                    await expectRevert(ibzVestingContract.transferFromFrozenBox(x, [recipients[x]], [web3.utils.toWei('1000')], {from: tokenOwner}), "IBZVesting: can not transfer yet");
+                }
+
                 await advanceBlockAtTime(releaseTime + (15 * oneDay) + (i * 30) * oneDay);
 
                 let timestamp = await ibzVestingContract.getTimestamp.call()
