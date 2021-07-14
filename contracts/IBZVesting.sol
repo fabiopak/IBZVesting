@@ -21,16 +21,22 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         // all percentages are multiplied by 1e18
         // 2.083333% every month (48 months) - Community
         vestingTypes.push(VestingType(2083333333333333334, 2083333333333333333, 0, true));
+        addFrozenBox(0);
         // 16.66667% every month (6 months) - Farming & Co.
         vestingTypes.push(VestingType(16666666666666666667, 16666666666666666667, 0, true));
+        addFrozenBox(0);
         // 3.57142857142857% every month (28 months) - Strategic investor
         vestingTypes.push(VestingType(3571428571428571429, 3571428571428571429, 0, true));
+        addFrozenBox(0);
         // 4.1666667% every month (24 months) - Core team and advisor
         vestingTypes.push(VestingType(4166666666666666667, 4166666666666666667, 0, true));
+        addFrozenBox(0);
         // 100% after 6 months
         vestingTypes.push(VestingType(100000000000000000000, 0, 6, true));
+        addFrozenBox(6);
         // 100% after 12 months
         vestingTypes.push(VestingType(100000000000000000000, 0, 12, true));
+        addFrozenBox(12);
     }
 
     function setReleaseTime(uint _relTime) public onlyOwner {
@@ -66,29 +72,36 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         uint initialAmount = mulDiv(totalAmounts, vestingType.initialRate, 100000000000000000000);  // amount * MonthlyRate / 100
         uint monthsDelay = vestingType.monthsDelay;
 
-        addFrozenBox(totalAmounts, monthlyAmount, initialAmount, monthsDelay);
+        //addFrozenBox(totalAmounts, monthlyAmount, initialAmount, monthsDelay);
 
-        vestingCounter = vestingCounter.add(1);
+        //vestingCounter = vestingCounter.add(1);
+        
+        frozenBoxes[vestingTypeIndex].totalAmount = totalAmounts;
+        frozenBoxes[vestingTypeIndex].monthlyAmount = monthlyAmount;
+        frozenBoxes[vestingTypeIndex].initialAmount = initialAmount;
+        frozenBoxes[vestingTypeIndex].monthsDelay = monthsDelay;
 
         return true;
     }
 
-    function addFrozenBox(uint totalAmount, uint monthlyAmount, uint initialAmount, uint monthsDelay) internal {
+    function addFrozenBox(uint monthsDelay) internal {
         uint releaseTime = getReleaseTime();
 
         // Create frozen wallets
         FrozenBox memory frozenBox = FrozenBox(
             vestingCounter,
-            totalAmount,
-            monthlyAmount,
-            initialAmount,
+            0, // totalAmount
+            0, // monthlyAmount,
+            0, // initialAmount,
             releaseTime.add(monthsDelay * (30 days)),
-            monthsDelay,
+            0, //monthsDelay,
             0
         );
 
         // Add wallet to frozen wallets
         frozenBoxes[vestingCounter] = frozenBox;
+        
+        vestingCounter = vestingCounter.add(1);
     }
 
     function getTimestamp() external view returns (uint) {
