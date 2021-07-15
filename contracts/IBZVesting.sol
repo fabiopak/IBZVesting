@@ -20,16 +20,16 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
 
         // all percentages are multiplied by 1e18
         // 2.083333% every month (48 months) - Community
-        vestingTypes.push(VestingType(2083333333333333334, 2083333333333333333, 0, true));
+        vestingTypes.push(VestingType(2083333333333333334, 0, 0, true));
         addFrozenBox(0);
         // 16.66667% every month (6 months) - Farming & Co.
-        vestingTypes.push(VestingType(16666666666666666667, 16666666666666666667, 0, true));
+        vestingTypes.push(VestingType(16666666666666666667, 0, 0, true));
         addFrozenBox(0);
         // 3.57142857142857% every month (28 months) - Strategic investor
-        vestingTypes.push(VestingType(3571428571428571429, 3571428571428571429, 0, true));
+        vestingTypes.push(VestingType(3571428571428571429, 0, 0, true));
         addFrozenBox(0);
         // 4.1666667% every month (24 months) - Core team and advisor
-        vestingTypes.push(VestingType(4166666666666666667, 4166666666666666667, 0, true));
+        vestingTypes.push(VestingType(4166666666666666667, 0, 0, true));
         addFrozenBox(0);
         // 100% after 6 months
         vestingTypes.push(VestingType(100000000000000000000, 0, 6, true));
@@ -177,7 +177,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
     function canTransfer(uint idxVest, uint amount) public view returns (bool) {
         uint transfAmount = getTransferableAmount(idxVest);
 
-        if (amount <= transfAmount && isStarted(frozenBoxes[idxVest].startDay)) {
+        if (amount > 0 && amount <= transfAmount && isStarted(frozenBoxes[idxVest].startDay)) {
             return true;
         }
 
