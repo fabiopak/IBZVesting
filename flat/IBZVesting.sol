@@ -1,6 +1,8 @@
+// File: lib/@openzeppelin/contracts-upgradeable/proxy/Initializable.sol
+
 // SPDX-License-Identifier: MIT
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2;
+// solhint-disable-next-line compiler-version
+pragma solidity >=0.4.24 <0.8.0;
 
 
 /**
@@ -61,6 +63,9 @@ abstract contract Initializable {
     }
 }
 
+// File: lib/@openzeppelin/contracts-upgradeable/GSN/ContextUpgradeable.sol
+
+pragma solidity >=0.6.0 <0.8.0;
 
 
 /*
@@ -90,6 +95,10 @@ abstract contract ContextUpgradeable is Initializable {
     }
     uint256[50] private __gap;
 }
+
+// File: lib/@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol
+
+pragma solidity >=0.6.0 <0.8.0;
 
 
 
@@ -184,6 +193,11 @@ abstract contract PausableUpgradeable is Initializable, ContextUpgradeable {
     uint256[49] private __gap;
 }
 
+// File: lib/@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol
+
+// -License-Identifier: MIT
+
+pragma solidity >=0.6.0 <0.8.0;
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -259,6 +273,11 @@ interface IERC20Upgradeable {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
+// File: lib/@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol
+
+// -License-Identifier: MIT
+
+pragma solidity >=0.6.0 <0.8.0;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -415,6 +434,12 @@ library SafeMathUpgradeable {
         return a % b;
     }
 }
+
+// File: lib/@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol
+
+// -License-Identifier: MIT
+
+pragma solidity >=0.6.2 <0.8.0;
 
 /**
  * @dev Collection of functions related to the address type
@@ -578,6 +603,13 @@ library AddressUpgradeable {
     }
 }
 
+// File: lib/@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol
+
+// -License-Identifier: MIT
+
+pragma solidity >=0.6.0 <0.8.0;
+
+
 
 
 /**
@@ -647,6 +679,12 @@ library SafeERC20Upgradeable {
         }
     }
 }
+
+// File: lib/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol
+
+// -License-Identifier: MIT
+
+pragma solidity >=0.6.0 <0.8.0;
 
 
 /**
@@ -719,6 +757,10 @@ abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
     uint256[49] private __gap;
 }
 
+// File: contracts/IBZVestingStorage.sol
+
+// -License-Identifier: MIT
+pragma solidity 0.6.12;
 
 contract IBZVestingStorage {
     struct FrozenBox {
@@ -748,6 +790,16 @@ contract IBZVestingStorage {
     VestingType[] public vestingTypes;
 }
 
+// File: contracts/IBZVesting.sol
+
+// -License-Identifier: MIT
+pragma solidity 0.6.12;
+pragma experimental ABIEncoderV2;
+
+
+
+
+
 
 
 contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, PausableUpgradeable {
@@ -761,17 +813,23 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
 
         // all percentages are multiplied by 1e18
         // 2.083333% every month (48 months) - Community
-        vestingTypes.push(VestingType(2083333333333333334, 2083333333333333333, 0, true));
+        vestingTypes.push(VestingType(2083333333333333334, 0, 0, true));
+        addFrozenBox(0);
         // 16.66667% every month (6 months) - Farming & Co.
-        vestingTypes.push(VestingType(16666666666666666667, 16666666666666666667, 0, true));
+        vestingTypes.push(VestingType(16666666666666666667, 0, 0, true));
+        addFrozenBox(0);
         // 3.57142857142857% every month (28 months) - Strategic investor
-        vestingTypes.push(VestingType(3571428571428571429, 3571428571428571429, 0, true));
+        vestingTypes.push(VestingType(3571428571428571429, 0, 0, true));
+        addFrozenBox(0);
         // 4.1666667% every month (24 months) - Core team and advisor
-        vestingTypes.push(VestingType(4166666666666666667, 4166666666666666667, 0, true));
+        vestingTypes.push(VestingType(4166666666666666667, 0, 0, true));
+        addFrozenBox(0);
         // 100% after 6 months
         vestingTypes.push(VestingType(100000000000000000000, 0, 6, true));
+        addFrozenBox(6);
         // 100% after 12 months
         vestingTypes.push(VestingType(100000000000000000000, 0, 12, true));
+        addFrozenBox(12);
     }
 
     function setReleaseTime(uint _relTime) public onlyOwner {
@@ -807,29 +865,36 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         uint initialAmount = mulDiv(totalAmounts, vestingType.initialRate, 100000000000000000000);  // amount * MonthlyRate / 100
         uint monthsDelay = vestingType.monthsDelay;
 
-        addFrozenBox(totalAmounts, monthlyAmount, initialAmount, monthsDelay);
+        //addFrozenBox(totalAmounts, monthlyAmount, initialAmount, monthsDelay);
 
-        vestingCounter = vestingCounter.add(1);
+        //vestingCounter = vestingCounter.add(1);
+        
+        frozenBoxes[vestingTypeIndex].totalAmount = totalAmounts;
+        frozenBoxes[vestingTypeIndex].monthlyAmount = monthlyAmount;
+        frozenBoxes[vestingTypeIndex].initialAmount = initialAmount;
+        frozenBoxes[vestingTypeIndex].monthsDelay = monthsDelay;
 
         return true;
     }
 
-    function addFrozenBox(uint totalAmount, uint monthlyAmount, uint initialAmount, uint monthsDelay) internal {
+    function addFrozenBox(uint monthsDelay) internal {
         uint releaseTime = getReleaseTime();
 
         // Create frozen wallets
         FrozenBox memory frozenBox = FrozenBox(
             vestingCounter,
-            totalAmount,
-            monthlyAmount,
-            initialAmount,
-            releaseTime.add(monthsDelay * (15 minutes)),
-            monthsDelay,
+            0, // totalAmount
+            0, // monthlyAmount,
+            0, // initialAmount,
+            releaseTime.add(monthsDelay * (30 days)),
+            0, //monthsDelay,
             0
         );
 
         // Add wallet to frozen wallets
         frozenBoxes[vestingCounter] = frozenBox;
+        
+        vestingCounter = vestingCounter.add(1);
     }
 
     function getTimestamp() external view returns (uint) {
@@ -844,10 +909,10 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
         }
 
         uint diff = block.timestamp.sub(releaseTime);
-        uint tmpdiff = diff.div(15 minutes).add(1);
+        uint tmpdiff = diff.div(30 days).add(1);
         uint months;
         if (tmpdiff >= monthsDelay)
-            months = diff.div(15 minutes).add(1).sub(monthsDelay);
+            months = diff.div(30 days).add(1).sub(monthsDelay);
 
         return months;
     }
@@ -905,7 +970,7 @@ contract IBZVesting is IBZVestingStorage, Initializable, OwnableUpgradeable, Pau
     function canTransfer(uint idxVest, uint amount) public view returns (bool) {
         uint transfAmount = getTransferableAmount(idxVest);
 
-        if (amount <= transfAmount && isStarted(frozenBoxes[idxVest].startDay)) {
+        if (amount > 0 && amount <= transfAmount && isStarted(frozenBoxes[idxVest].startDay)) {
             return true;
         }
 
